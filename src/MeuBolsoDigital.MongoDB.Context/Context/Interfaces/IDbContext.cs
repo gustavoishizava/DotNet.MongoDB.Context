@@ -6,6 +6,8 @@ namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
     {
         IMongoClient Client { get; }
         IMongoDatabase Database { get; }
-        IClientSessionHandle ClientSessionHandle { get; }
+        Task<IClientSessionHandle> GetClientSessionHandleAsync();
+        Task CommitAsync();
+        Task RollbackAsync();
     }
 }
