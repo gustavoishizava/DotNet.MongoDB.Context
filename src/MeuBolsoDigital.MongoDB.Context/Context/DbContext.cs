@@ -10,7 +10,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
         private IClientSessionHandle _clientSessionHandle { get; set; }
-        private Dictionary<Type, string> _collections { get; set; }
+        private Dictionary<Type, string> _collections { get; init; }
 
         public DbContext(MongoDbContextOptions options)
         {
