@@ -17,21 +17,13 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
 
             Client = new MongoClient(options.ConnectionString);
             Database = Client.GetDatabase(options.DatabaseName);
+            _clientSessionHandle = Client.StartSession();
         }
 
-        public async Task<IClientSessionHandle> GetClientSessionHandleAsync()
+        public void StartTransaction()
         {
-            if (_clientSessionHandle is null)
-                return await Client.StartSessionAsync();
-
-            return _clientSessionHandle;
-        }
-
-        public async Task StartTransactionAsync()
-        {
-            var session = await GetClientSessionHandleAsync();
-            if (!session.IsInTransaction)
-                session.StartTransaction();
+            if (!_clientSessionHandle.IsInTransaction)
+                _clientSessionHandle.StartTransaction();
         }
 
         public async Task CommitAsync()
