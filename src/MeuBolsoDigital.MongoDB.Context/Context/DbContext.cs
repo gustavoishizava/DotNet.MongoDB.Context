@@ -97,12 +97,12 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
 
         public async Task<TDocument> GetOneAsync<TDocument>(FilterDefinition<TDocument> filter)
         {
-            return await GetCollection<TDocument>().Find(filter).FirstOrDefaultAsync();
+            return await GetCollection<TDocument>().Find(_clientSessionHandle, filter).FirstOrDefaultAsync();
         }
 
         public async Task<List<TDocument>> GetManyAsync<TDocument>(FilterDefinition<TDocument> filter)
         {
-            return await GetCollection<TDocument>().Find(filter).ToListAsync();
+            return await GetCollection<TDocument>().Find(_clientSessionHandle, filter).ToListAsync();
         }
 
         #endregion
