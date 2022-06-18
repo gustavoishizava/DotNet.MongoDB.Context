@@ -22,14 +22,15 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         public async Task<IClientSessionHandle> GetClientSessionHandleAsync()
         {
             if (ClientSessionHandle is null)
-            {
-                var session = await Client.StartSessionAsync();
-                session.StartTransaction();
-
-                return session;
-            }
+                return await Client.StartSessionAsync();
 
             return ClientSessionHandle;
+        }
+
+        public async Task StartTransactionAsync()
+        {
+            var session = await GetClientSessionHandleAsync();
+            session.StartTransaction();
         }
 
         public async Task CommitAsync()
