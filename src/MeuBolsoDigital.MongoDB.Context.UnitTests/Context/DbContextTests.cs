@@ -14,7 +14,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             {
             }
 
-            public override Dictionary<Type, string> ConfigureCollections()
+            protected override Dictionary<Type, string> ConfigureCollections()
             {
                 return new Dictionary<Type, string>();
             }

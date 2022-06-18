@@ -23,7 +23,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             _collections = ConfigureCollections();
         }
 
-        public abstract Dictionary<Type, string> ConfigureCollections();
+        protected abstract Dictionary<Type, string> ConfigureCollections();
 
         public IMongoCollection<TDocument> GetCollection<TDocument>()
         {
