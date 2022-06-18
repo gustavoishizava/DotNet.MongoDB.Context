@@ -8,7 +8,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
     {
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
-        private IClientSessionHandle ClientSessionHandle { get; set; }
+        private IClientSessionHandle _clientSessionHandle { get; set; }
 
         public DbContext(MongoDbContextOptions options)
         {
@@ -21,33 +21,34 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
 
         public async Task<IClientSessionHandle> GetClientSessionHandleAsync()
         {
-            if (ClientSessionHandle is null)
+            if (_clientSessionHandle is null)
                 return await Client.StartSessionAsync();
 
-            return ClientSessionHandle;
+            return _clientSessionHandle;
         }
 
         public async Task StartTransactionAsync()
         {
             var session = await GetClientSessionHandleAsync();
-            session.StartTransaction();
+            if (!session.IsInTransaction)
+                session.StartTransaction();
         }
 
         public async Task CommitAsync()
         {
-            if (ClientSessionHandle is not null)
-                await ClientSessionHandle.CommitTransactionAsync();
+            if (_clientSessionHandle is not null && _clientSessionHandle.IsInTransaction)
+                await _clientSessionHandle.CommitTransactionAsync();
         }
 
         public async Task RollbackAsync()
         {
-            if (ClientSessionHandle is not null)
-                await ClientSessionHandle.AbortTransactionAsync();
+            if (_clientSessionHandle is not null && _clientSessionHandle.IsInTransaction)
+                await _clientSessionHandle.AbortTransactionAsync();
         }
 
         public void Dispose()
         {
-            ClientSessionHandle.Dispose();
+            _clientSessionHandle.Dispose();
             GC.SuppressFinalize(this);
         }
     }
