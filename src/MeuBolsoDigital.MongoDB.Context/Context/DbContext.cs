@@ -9,6 +9,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
         private IClientSessionHandle _clientSessionHandle { get; set; }
+        private Dictionary<Type, string> _collections { get; set; }
 
         public DbContext(MongoDbContextOptions options)
         {
@@ -18,7 +19,20 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             Client = new MongoClient(options.ConnectionString);
             Database = Client.GetDatabase(options.DatabaseName);
             _clientSessionHandle = Client.StartSession();
+            _collections = ConfigureCollections();
         }
+
+        public abstract Dictionary<Type, string> ConfigureCollections();
+
+        public IMongoCollection<TDocument> GetCollection<TDocument>()
+        {
+            if (!_collections.TryGetValue(typeof(TDocument), out var collectionName))
+                throw new KeyNotFoundException($"Collection not found to type {typeof(TDocument).Name}.");
+
+            return Database.GetCollection<TDocument>(collectionName);
+        }
+
+        #region Transaction operations
 
         public void StartTransaction()
         {
@@ -37,6 +51,22 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             if (_clientSessionHandle is not null && _clientSessionHandle.IsInTransaction)
                 await _clientSessionHandle.AbortTransactionAsync();
         }
+
+        #endregion
+
+        #region Collection Operations
+
+        public async Task AddAsync<TDocument>(TDocument document)
+        {
+            await GetCollection<TDocument>().InsertOneAsync(_clientSessionHandle, document);
+        }
+
+        public async Task AddRangeAsync<TDocument>(List<TDocument> documents)
+        {
+            await GetCollection<TDocument>().InsertManyAsync(_clientSessionHandle, documents);
+        }
+
+        #endregion
 
         public void Dispose()
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context;
 using Xunit;
@@ -11,6 +12,11 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
         {
             public TestDbContext(MongoDbContextOptions options) : base(options)
             {
+            }
+
+            public override Dictionary<Type, string> ConfigureCollections()
+            {
+                return new Dictionary<Type, string>();
             }
         }
 

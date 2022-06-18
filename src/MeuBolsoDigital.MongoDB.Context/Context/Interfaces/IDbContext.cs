@@ -2,12 +2,10 @@ using MongoDB.Driver;
 
 namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
 {
-    public interface IDbContext
+    public interface IDbContext : IDbContextTransactionOperations, IDbContextCollectionOperations
     {
         IMongoClient Client { get; }
         IMongoDatabase Database { get; }
-        void StartTransaction();
-        Task CommitAsync();
-        Task RollbackAsync();
+        IMongoCollection<TDocument> GetCollection<TDocument>();
     }
 }
