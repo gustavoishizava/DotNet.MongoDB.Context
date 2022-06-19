@@ -23,6 +23,14 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             _collections = ConfigureCollections();
         }
 
+        protected DbContext(IMongoClient mongoClient, string databaseName)
+        {
+            Client = mongoClient;
+            Database = Client.GetDatabase(databaseName);
+            _clientSessionHandle = Client.StartSession();
+            _collections = ConfigureCollections();
+        }
+
         protected abstract Dictionary<Type, string> ConfigureCollections();
 
         public IMongoCollection<TDocument> GetCollection<TDocument>()
@@ -43,13 +51,13 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
 
         public async Task CommitAsync()
         {
-            if (_clientSessionHandle is not null && _clientSessionHandle.IsInTransaction)
+            if (_clientSessionHandle.IsInTransaction)
                 await _clientSessionHandle.CommitTransactionAsync();
         }
 
         public async Task RollbackAsync()
         {
-            if (_clientSessionHandle is not null && _clientSessionHandle.IsInTransaction)
+            if (_clientSessionHandle.IsInTransaction)
                 await _clientSessionHandle.AbortTransactionAsync();
         }
 
