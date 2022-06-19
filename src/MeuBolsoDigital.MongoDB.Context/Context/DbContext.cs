@@ -1,3 +1,4 @@
+using System.Reflection;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context.Interfaces;
 using MongoDB.Bson;
@@ -10,7 +11,6 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
         private IClientSessionHandle _clientSessionHandle { get; set; }
-        private Dictionary<Type, string> _collections { get; init; }
 
         public DbContext(MongoDbContextOptions options)
         {
@@ -20,7 +20,8 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             Client = new MongoClient(options.ConnectionString);
             Database = Client.GetDatabase(options.DatabaseName);
             _clientSessionHandle = Client.StartSession();
-            _collections = ConfigureCollections();
+            RegisterCollections();
+            ConfigureCollections();
         }
 
         protected DbContext(IMongoClient mongoClient, string databaseName)
@@ -28,17 +29,41 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             Client = mongoClient;
             Database = Client.GetDatabase(databaseName);
             _clientSessionHandle = Client.StartSession();
-            _collections = ConfigureCollections();
+            RegisterCollections();
+            ConfigureCollections();
         }
 
-        protected abstract Dictionary<Type, string> ConfigureCollections();
+        protected abstract void ConfigureCollections();
+
+        private List<PropertyInfo> GetCollectionProperties()
+        {
+            return GetType().GetProperties()
+                    .Where(x => x.PropertyType.IsInterface
+                                && x.PropertyType.IsGenericType
+                                && x.PropertyType.GetGenericTypeDefinition() == typeof(IMongoCollection<>)).ToList();
+        }
+
+        private void RegisterCollections()
+        {
+            var collectionProperties = GetCollectionProperties();
+
+            foreach (var property in collectionProperties)
+            {
+                var documentType = property.PropertyType.GenericTypeArguments[0];
+
+                var getCollectionMethod = Database.GetType().GetMethod(nameof(IMongoDatabase.GetCollection))
+                                            .MakeGenericMethod(new[] { documentType });
+
+                var mongoCollection = getCollectionMethod.Invoke(Database, new object[] { documentType.Name, null });
+                property.SetValue(this, mongoCollection);
+            }
+        }
 
         public IMongoCollection<TDocument> GetCollection<TDocument>()
         {
-            if (!_collections.TryGetValue(typeof(TDocument), out var collectionName))
-                throw new KeyNotFoundException($"Collection not found to type {typeof(TDocument).Name}.");
-
-            return Database.GetCollection<TDocument>(collectionName);
+            return (IMongoCollection<TDocument>)GetCollectionProperties()
+                .First(x => x.PropertyType == typeof(IMongoCollection<TDocument>))
+                .GetValue(this);
         }
 
         #region Transaction operations

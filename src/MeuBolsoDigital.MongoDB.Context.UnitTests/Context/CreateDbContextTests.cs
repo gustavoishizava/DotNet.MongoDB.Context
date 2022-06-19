@@ -26,6 +26,10 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             _mockMongoClient.Setup(x => x.StartSession(null, default))
                 .Returns(_mockClientSessionHandle.Object);
+
+            var mockCollection = new Mock<IMongoCollection<Product>>();
+            _mockMongoDatabase.Setup(x => x.GetCollection<Product>(It.IsAny<string>(), null))
+                .Returns(mockCollection.Object);
         }
 
         private TestDbContext CreateContext()
@@ -53,6 +57,20 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Assert
             Assert.NotNull(context.Client);
             Assert.NotNull(context.Database);
+            Assert.NotNull(context.Products);
+        }
+
+        [Fact]
+        public void GetCollection_ReturnInstance()
+        {
+            // Arrange
+            var context = CreateContext();
+
+            // Act
+            var collection = context.GetCollection<Product>();
+
+            // Assert
+            Assert.NotNull(collection);
         }
     }
 }
