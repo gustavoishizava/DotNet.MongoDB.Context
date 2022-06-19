@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
 using MongoDB.Driver;
@@ -64,6 +65,74 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Assert
             _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
             _mockClientSessionHandle.Verify(x => x.StartTransaction(null), Times.Never);
+        }
+
+        [Fact]
+        public async Task IsInTransaction_Commit_ShouldCommitTransaction()
+        {
+            // Arrange
+            _mockClientSessionHandle.Setup(x => x.IsInTransaction)
+                .Returns(true);
+
+            var context = CreateContext();
+
+            // Act
+            await context.CommitAsync();
+
+            // Assert
+            _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
+            _mockClientSessionHandle.Verify(x => x.CommitTransactionAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task NotInTransaction_Commit_DoNothing()
+        {
+            // Arrange
+            _mockClientSessionHandle.Setup(x => x.IsInTransaction)
+                .Returns(false);
+
+            var context = CreateContext();
+
+            // Act
+            await context.CommitAsync();
+
+            // Assert
+            _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
+            _mockClientSessionHandle.Verify(x => x.CommitTransactionAsync(default), Times.Never);
+        }
+
+        [Fact]
+        public async Task IsInTransaction_Rollback_ShouldRollbackTransaction()
+        {
+            // Arrange
+            _mockClientSessionHandle.Setup(x => x.IsInTransaction)
+                .Returns(true);
+
+            var context = CreateContext();
+
+            // Act
+            await context.RollbackAsync();
+
+            // Assert
+            _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
+            _mockClientSessionHandle.Verify(x => x.AbortTransactionAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task NotInTransaction_Rollback_DoNothing()
+        {
+            // Arrange
+            _mockClientSessionHandle.Setup(x => x.IsInTransaction)
+                .Returns(false);
+
+            var context = CreateContext();
+
+            // Act
+            await context.RollbackAsync();
+
+            // Assert
+            _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
+            _mockClientSessionHandle.Verify(x => x.AbortTransactionAsync(default), Times.Never);
         }
     }
 }
