@@ -1,21 +1,20 @@
 using System;
-using System.Collections.Generic;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
-using MeuBolsoDigital.MongoDB.Context.Context;
+using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
 
 namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 {
-    public class DbContextTests
+    public class CreateDbContextTests
     {
         private Mock<IMongoClient> _mockMongoClient;
         private Mock<IMongoDatabase> _mockMongoDatabase;
         private Mock<IClientSessionHandle> _mockClientSessionHandle;
         private MongoDbContextOptions _contextOptions;
 
-        public DbContextTests()
+        public CreateDbContextTests()
         {
             _mockMongoClient = new Mock<IMongoClient>();
             _mockMongoDatabase = new Mock<IMongoDatabase>();
@@ -27,22 +26,6 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             _mockMongoClient.Setup(x => x.StartSession(null, default))
                 .Returns(_mockClientSessionHandle.Object);
-        }
-
-        private class TestDbContext : DbContext
-        {
-            public TestDbContext(MongoDbContextOptions options) : base(options)
-            {
-            }
-
-            public TestDbContext(IMongoClient mongoClient, string databaseName) : base(mongoClient, databaseName)
-            {
-            }
-
-            protected override Dictionary<Type, string> ConfigureCollections()
-            {
-                return new Dictionary<Type, string>();
-            }
         }
 
         private TestDbContext CreateContext()
@@ -70,40 +53,6 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Assert
             Assert.NotNull(context.Client);
             Assert.NotNull(context.Database);
-        }
-
-        [Fact]
-        public void NoTransaction_StartTransaction_ReturnSuccess()
-        {
-            // Arrange
-            _mockClientSessionHandle.Setup(x => x.IsInTransaction)
-                .Returns(false);
-
-            var context = CreateContext();
-
-            // Act
-            context.StartTransaction();
-
-            // Assert
-            _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
-            _mockClientSessionHandle.Verify(x => x.StartTransaction(null), Times.Once);
-        }
-
-        [Fact]
-        public void HasTransaction_StartTransaction_DoNothing()
-        {
-            // Arrange
-            _mockClientSessionHandle.Setup(x => x.IsInTransaction)
-                .Returns(true);
-
-            var context = CreateContext();
-
-            // Act
-            context.StartTransaction();
-
-            // Assert
-            _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
-            _mockClientSessionHandle.Verify(x => x.StartTransaction(null), Times.Never);
         }
     }
 }
