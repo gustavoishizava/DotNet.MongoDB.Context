@@ -11,6 +11,9 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
         private IClientSessionHandle _clientSessionHandle { get; set; }
+        private Dictionary<Type, string> _collectionNames { get; init; }
+
+        public IReadOnlyDictionary<Type, string> CollectionNames => _collectionNames;
 
         public DbContext(MongoDbContextOptions options)
         {
@@ -20,8 +23,11 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             Client = new MongoClient(options.ConnectionString);
             Database = Client.GetDatabase(options.DatabaseName);
             _clientSessionHandle = Client.StartSession();
+            _collectionNames = new Dictionary<Type, string>();
+
+            ConfigureCollectionNames();
+            OnModelConfiguring();
             RegisterCollections();
-            ConfigureCollections();
         }
 
         protected DbContext(IMongoClient mongoClient, string databaseName)
@@ -29,11 +35,24 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             Client = mongoClient;
             Database = Client.GetDatabase(databaseName);
             _clientSessionHandle = Client.StartSession();
+            _collectionNames = new Dictionary<Type, string>();
+
+            ConfigureCollectionNames();
+            OnModelConfiguring();
             RegisterCollections();
-            ConfigureCollections();
         }
 
-        protected abstract void ConfigureCollections();
+        protected virtual void OnModelConfiguring()
+        {
+        }
+
+        public abstract void OnModelNameConfiguring(Dictionary<Type, string> collectionNames);
+
+        private void ConfigureCollectionNames()
+        {
+            var method = GetType().GetMethod(nameof(DbContext.OnModelNameConfiguring));
+            method.Invoke(this, new object[] { _collectionNames });
+        }
 
         private List<PropertyInfo> GetCollectionProperties()
         {
@@ -54,7 +73,9 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
                 var getCollectionMethod = Database.GetType().GetMethod(nameof(IMongoDatabase.GetCollection))
                                             .MakeGenericMethod(new[] { documentType });
 
-                var mongoCollection = getCollectionMethod.Invoke(Database, new object[] { documentType.Name, null });
+                var collectionName = _collectionNames.TryGetValue(documentType, out var name) ? name : documentType.Name;
+
+                var mongoCollection = getCollectionMethod.Invoke(Database, new object[] { collectionName, null });
                 property.SetValue(this, mongoCollection);
             }
         }

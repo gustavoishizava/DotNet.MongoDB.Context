@@ -27,8 +27,9 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common
         {
         }
 
-        protected override void ConfigureCollections()
+        public override void OnModelNameConfiguring(Dictionary<Type, string> collectionNames)
         {
+            collectionNames.Add(typeof(Product), "products");
         }
     }
 }
