@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context;
+using MeuBolsoDigital.MongoDB.Context.Context.ModelConfiguration;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 
@@ -30,6 +32,11 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common
         public override void OnModelNameConfiguring(Dictionary<Type, string> collectionNames)
         {
             collectionNames.Add(typeof(Product), "products");
+        }
+
+        protected override void OnModelConfiguring(ModelBuilder modelBuilder)
+        {
+            modelBuilder.AddModelMap("product", new BsonClassMap<ModelTest>());
         }
     }
 }

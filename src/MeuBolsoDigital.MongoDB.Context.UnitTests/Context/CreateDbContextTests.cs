@@ -58,7 +58,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             Assert.NotNull(context.Client);
             Assert.NotNull(context.Database);
             Assert.NotNull(context.Products);
-            Assert.Single(context.CollectionNames);
+            Assert.Single(context.ModelMaps);
         }
 
         [Fact]
