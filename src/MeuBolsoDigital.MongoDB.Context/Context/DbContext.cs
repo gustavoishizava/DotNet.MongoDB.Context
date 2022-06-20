@@ -1,7 +1,6 @@
 using System.Reflection;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context.Interfaces;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MeuBolsoDigital.MongoDB.Context.Context
@@ -105,58 +104,6 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         {
             if (_clientSessionHandle.IsInTransaction)
                 await _clientSessionHandle.AbortTransactionAsync();
-        }
-
-        #endregion
-
-        #region Collection Operations
-
-        public async Task InsertOneAsync<TDocument>(TDocument document)
-        {
-            StartTransaction();
-            await GetCollection<TDocument>().InsertOneAsync(_clientSessionHandle, document);
-        }
-
-        public async Task InsertManyAsync<TDocument>(List<TDocument> documents)
-        {
-            StartTransaction();
-            await GetCollection<TDocument>().InsertManyAsync(_clientSessionHandle, documents);
-        }
-
-        public async Task UpdateAsync<TDocument>(FilterDefinition<TDocument> filter, TDocument document)
-        {
-            StartTransaction();
-            var update = new BsonDocument { { "$set", document.ToBsonDocument() } };
-            await GetCollection<TDocument>().UpdateOneAsync(_clientSessionHandle, filter, update, new() { IsUpsert = true });
-        }
-
-        public async Task UpdateManyAsync<TDocument>(FilterDefinition<TDocument> filter, TDocument document)
-        {
-            StartTransaction();
-            var update = new BsonDocument { { "$set", document.ToBsonDocument() } };
-            await GetCollection<TDocument>().UpdateManyAsync(_clientSessionHandle, filter, update, new() { IsUpsert = true });
-        }
-
-        public async Task RemoveAsync<TDocument>(FilterDefinition<TDocument> filter)
-        {
-            StartTransaction();
-            await GetCollection<TDocument>().DeleteOneAsync(_clientSessionHandle, filter);
-        }
-
-        public async Task RemoveManyAsync<TDocument>(FilterDefinition<TDocument> filter)
-        {
-            StartTransaction();
-            await GetCollection<TDocument>().DeleteManyAsync(_clientSessionHandle, filter);
-        }
-
-        public async Task<TDocument> GetOneAsync<TDocument>(FilterDefinition<TDocument> filter)
-        {
-            return await GetCollection<TDocument>().Find(_clientSessionHandle, filter).FirstOrDefaultAsync();
-        }
-
-        public async Task<List<TDocument>> GetManyAsync<TDocument>(FilterDefinition<TDocument> filter)
-        {
-            return await GetCollection<TDocument>().Find(_clientSessionHandle, filter).ToListAsync();
         }
 
         #endregion
