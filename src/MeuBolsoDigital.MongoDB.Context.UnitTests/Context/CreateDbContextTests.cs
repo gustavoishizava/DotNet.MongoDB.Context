@@ -60,18 +60,5 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             Assert.NotNull(context.Products);
             Assert.Single(context.ModelMaps);
         }
-
-        [Fact]
-        public void GetCollection_ReturnInstance()
-        {
-            // Arrange
-            var context = CreateContext();
-
-            // Act
-            var collection = context.GetCollection<Product>();
-
-            // Assert
-            Assert.NotNull(collection);
-        }
     }
 }

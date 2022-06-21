@@ -21,6 +21,11 @@ namespace MeuBolsoDigital.MongoDB.Context.Context.ModelConfiguration
             _modelMaps.Add(modelMap);
         }
 
+        public string GetCollectionName(Type type)
+        {
+            return _modelMaps.FirstOrDefault(x => x.BsonClassMap.ClassType == type)?.CollectionName;
+        }
+
         private bool ModelMapExists(ModelMap modelMap)
         {
             return _modelMaps.Any(x => x.CollectionName.Equals(modelMap.CollectionName) || x.BsonClassMap.ClassType == modelMap.BsonClassMap.ClassType);

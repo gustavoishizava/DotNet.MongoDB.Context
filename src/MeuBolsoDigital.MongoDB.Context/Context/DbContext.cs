@@ -2,6 +2,7 @@ using System.Reflection;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context.Interfaces;
 using MeuBolsoDigital.MongoDB.Context.Context.ModelConfiguration;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace MeuBolsoDigital.MongoDB.Context.Context
@@ -12,9 +13,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
         private IClientSessionHandle _clientSessionHandle { get; set; }
-        private Dictionary<Type, string> _collectionNames { get; init; }
 
-        public IReadOnlyDictionary<Type, string> CollectionNames => _collectionNames;
         public IReadOnlyList<ModelMap> ModelMaps => _modelBuilder.ModelMaps;
 
         public DbContext(MongoDbContextOptions options)
@@ -26,10 +25,8 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             Client = new MongoClient(options.ConnectionString);
             Database = Client.GetDatabase(options.DatabaseName);
             _clientSessionHandle = Client.StartSession();
-            _collectionNames = new Dictionary<Type, string>();
 
             ConfigureModels();
-            ConfigureCollectionNames();
             RegisterCollections();
         }
 
@@ -39,10 +36,8 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             Client = mongoClient;
             Database = Client.GetDatabase(databaseName);
             _clientSessionHandle = Client.StartSession();
-            _collectionNames = new Dictionary<Type, string>();
 
             ConfigureModels();
-            ConfigureCollectionNames();
             RegisterCollections();
         }
 
@@ -54,14 +49,12 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         {
             var method = GetType().GetMethod(nameof(DbContext.OnModelConfiguring), BindingFlags.Instance | BindingFlags.NonPublic);
             method.Invoke(this, new object[] { _modelBuilder });
-        }
 
-        public abstract void OnModelNameConfiguring(Dictionary<Type, string> collectionNames);
-
-        private void ConfigureCollectionNames()
-        {
-            var method = GetType().GetMethod(nameof(DbContext.OnModelNameConfiguring));
-            method.Invoke(this, new object[] { _collectionNames });
+            foreach (var map in _modelBuilder.ModelMaps)
+            {
+                if (!BsonClassMap.IsClassMapRegistered(map.BsonClassMap.ClassType))
+                    BsonClassMap.RegisterClassMap(map.BsonClassMap);
+            }
         }
 
         private List<PropertyInfo> GetCollectionProperties()
@@ -83,18 +76,11 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
                 var getCollectionMethod = Database.GetType().GetMethod(nameof(IMongoDatabase.GetCollection))
                                             .MakeGenericMethod(new[] { documentType });
 
-                var collectionName = _collectionNames.TryGetValue(documentType, out var name) ? name : documentType.Name;
+                var collectionName = _modelBuilder.GetCollectionName(documentType) ?? documentType.Name;
 
                 var mongoCollection = getCollectionMethod.Invoke(Database, new object[] { collectionName, null });
                 property.SetValue(this, mongoCollection);
             }
-        }
-
-        public IMongoCollection<TDocument> GetCollection<TDocument>()
-        {
-            return (IMongoCollection<TDocument>)GetCollectionProperties()
-                .First(x => x.PropertyType == typeof(IMongoCollection<TDocument>))
-                .GetValue(this);
         }
 
         #region Transaction operations

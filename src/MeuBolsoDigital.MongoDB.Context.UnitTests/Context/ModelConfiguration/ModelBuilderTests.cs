@@ -40,8 +40,8 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context.ModelConfiguration
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap(collectionName, new BsonClassMap<ModelTest>());
-            modelBuilder.AddModelMap(collectionName, new BsonClassMap<ModelTest>());
+            modelBuilder.AddModelMap(collectionName, new BsonClassMap<Customer>());
+            modelBuilder.AddModelMap(collectionName, new BsonClassMap<Customer>());
 
             // Assert
             Assert.Single(modelBuilder.ModelMaps);
@@ -54,8 +54,8 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context.ModelConfiguration
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap("products1", new BsonClassMap<ModelTest>());
-            modelBuilder.AddModelMap("products2", new BsonClassMap<ModelTest>());
+            modelBuilder.AddModelMap("products1", new BsonClassMap<Customer>());
+            modelBuilder.AddModelMap("products2", new BsonClassMap<Customer>());
 
             // Assert
             Assert.Single(modelBuilder.ModelMaps);
@@ -68,11 +68,39 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context.ModelConfiguration
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap("products1", new BsonClassMap<ModelTest>());
-            modelBuilder.AddModelMap("products2", new BsonClassMap<ModelTest2>());
+            modelBuilder.AddModelMap("products1", new BsonClassMap<Customer>());
+            modelBuilder.AddModelMap("products2", new BsonClassMap<User>());
 
             // Assert
             Assert.Equal(2, modelBuilder.ModelMaps.Count);
+        }
+
+        [Fact]
+        public void CollectionNoExists_GetCollectionName_ReturnNull()
+        {
+            // Arrange
+            var modelBuilder = new ModelBuilder();
+
+            // Act
+            var result = modelBuilder.GetCollectionName(typeof(Customer));
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void CollectionExists_GetCollectionName_ReturnName()
+        {
+            // Arrange
+            var modelBuilder = new ModelBuilder();
+            var collectionName = "products";
+            modelBuilder.AddModelMap(collectionName, new BsonClassMap<Customer>());
+
+            // Act
+            var result = modelBuilder.GetCollectionName(typeof(Customer));
+
+            // Assert
+            Assert.Equal(collectionName, result);
         }
     }
 }

@@ -7,10 +7,6 @@ namespace MeuBolsoDigital.MongoDB.Context.Context.ModelConfiguration
         public string CollectionName { get; private init; }
         public BsonClassMap BsonClassMap { get; private init; }
 
-        protected ModelMap()
-        {
-        }
-
         internal ModelMap(string collectionName, BsonClassMap bsonClassMap)
         {
             if (string.IsNullOrEmpty(collectionName))

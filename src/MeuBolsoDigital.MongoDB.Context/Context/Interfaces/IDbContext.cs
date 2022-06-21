@@ -6,6 +6,5 @@ namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
     {
         IMongoClient Client { get; }
         IMongoDatabase Database { get; }
-        IMongoCollection<TDocument> GetCollection<TDocument>();
     }
 }

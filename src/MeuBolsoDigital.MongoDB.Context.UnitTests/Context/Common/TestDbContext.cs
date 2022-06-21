@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context;
 using MeuBolsoDigital.MongoDB.Context.Context.ModelConfiguration;
@@ -17,9 +15,22 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common
         public string Name { get; set; }
     }
 
+    public class Customer
+    {
+        [BsonId]
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class User : Customer
+    {
+    }
+
     public class TestDbContext : DbContext
     {
         public IMongoCollection<Product> Products { get; set; }
+        public IMongoCollection<Customer> Customers { get; set; }
+        public IMongoCollection<User> Users { get; set; }
 
         public TestDbContext(MongoDbContextOptions options) : base(options)
         {
@@ -29,14 +40,9 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common
         {
         }
 
-        public override void OnModelNameConfiguring(Dictionary<Type, string> collectionNames)
-        {
-            collectionNames.Add(typeof(Product), "products");
-        }
-
         protected override void OnModelConfiguring(ModelBuilder modelBuilder)
         {
-            modelBuilder.AddModelMap("product", new BsonClassMap<ModelTest>());
+            modelBuilder.AddModelMap("customers", new BsonClassMap<Customer>());
         }
     }
 }
