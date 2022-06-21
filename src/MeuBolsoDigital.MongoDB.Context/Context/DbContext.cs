@@ -9,31 +9,30 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
 {
     public abstract class DbContext : IDbContext, IDisposable
     {
-        private readonly ModelBuilder _modelBuilder;
+        private readonly ModelBuilder _modelBuilder = new();
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
         private IClientSessionHandle _clientSessionHandle { get; set; }
 
         public IReadOnlyList<ModelMap> ModelMaps => _modelBuilder.ModelMaps;
 
-        public DbContext(MongoDbContextOptions options)
+        protected DbContext(MongoDbContextOptions options)
         {
             if (options is null)
                 throw new ArgumentNullException(nameof(options), "Options cannot be null.");
 
-            _modelBuilder = new();
             Client = new MongoClient(options.ConnectionString);
-            Database = Client.GetDatabase(options.DatabaseName);
-            _clientSessionHandle = Client.StartSession();
-
-            ConfigureModels();
-            RegisterCollections();
+            Configure(options.DatabaseName);
         }
 
         protected DbContext(IMongoClient mongoClient, string databaseName)
         {
-            _modelBuilder = new();
             Client = mongoClient;
+            Configure(databaseName);
+        }
+
+        private void Configure(string databaseName)
+        {
             Database = Client.GetDatabase(databaseName);
             _clientSessionHandle = Client.StartSession();
 
