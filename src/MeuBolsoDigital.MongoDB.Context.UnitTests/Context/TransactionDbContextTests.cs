@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
-using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
+using MeuBolsoDigital.MongoDB.Context.Context;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -9,6 +9,17 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 {
     public class TransactionDbContextTests
     {
+        private class TransactionContextTest : DbContext
+        {
+            public TransactionContextTest(MongoDbContextOptions options) : base(options)
+            {
+            }
+
+            public TransactionContextTest(IMongoClient mongoClient, string databaseName) : base(mongoClient, databaseName)
+            {
+            }
+        }
+
         private Mock<IMongoClient> _mockMongoClient;
         private Mock<IMongoDatabase> _mockMongoDatabase;
         private Mock<IClientSessionHandle> _mockClientSessionHandle;
@@ -28,9 +39,9 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
                 .Returns(_mockClientSessionHandle.Object);
         }
 
-        private TestDbContext CreateContext()
+        private TransactionContextTest CreateContext()
         {
-            return new TestDbContext(_mockMongoClient.Object, _contextOptions.DatabaseName);
+            return new TransactionContextTest(_mockMongoClient.Object, _contextOptions.DatabaseName);
         }
 
         [Fact]
