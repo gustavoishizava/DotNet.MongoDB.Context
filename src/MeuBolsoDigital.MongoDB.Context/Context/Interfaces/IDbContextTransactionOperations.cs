@@ -1,6 +1,6 @@
 namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
 {
-    public interface IDbContextTransactionOperations
+    internal interface IDbContextTransactionOperations
     {
         void StartTransaction();
         Task CommitAsync();

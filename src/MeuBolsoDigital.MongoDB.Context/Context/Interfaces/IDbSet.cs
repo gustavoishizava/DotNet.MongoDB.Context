@@ -2,7 +2,7 @@ using MongoDB.Driver;
 
 namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
 {
-    public interface IDbSet<TDocument> where TDocument : class
+    internal interface IDbSet<TDocument> where TDocument : class
     {
         IMongoCollection<TDocument> Collection { get; }
         DbContext DbContext { get; }

@@ -1,5 +1,6 @@
 using System.Reflection;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
+using MeuBolsoDigital.MongoDB.Context.Context.ChangeTracking;
 using MeuBolsoDigital.MongoDB.Context.Context.Interfaces;
 using MeuBolsoDigital.MongoDB.Context.Context.ModelConfiguration;
 using MongoDB.Bson.Serialization;
@@ -12,7 +13,8 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         private readonly ModelBuilder _modelBuilder = new();
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
-        public IClientSessionHandle ClientSessionHandle { get; set; }
+        public IClientSessionHandle ClientSessionHandle { get; private set; }
+        public ChangeTracker ChangeTracker { get; private set; }
 
         public IReadOnlyList<ModelMap> ModelMaps => _modelBuilder.ModelMaps;
 
@@ -35,6 +37,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         {
             Database = Client.GetDatabase(databaseName);
             ClientSessionHandle = Client.StartSession();
+            ChangeTracker = new();
 
             ConfigureModels();
             RegisterCollections();
@@ -60,6 +63,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         {
             return GetType().GetProperties()
                     .Where(x => x.PropertyType.IsClass
+                                && x.PropertyType.IsGenericType
                                 && x.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>)).ToList();
         }
 
@@ -82,8 +86,6 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             }
         }
 
-        #region Transaction operations
-
         public void StartTransaction()
         {
             if (!ClientSessionHandle.IsInTransaction)
@@ -101,8 +103,6 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             if (ClientSessionHandle.IsInTransaction)
                 await ClientSessionHandle.AbortTransactionAsync();
         }
-
-        #endregion
 
         public void Dispose()
         {

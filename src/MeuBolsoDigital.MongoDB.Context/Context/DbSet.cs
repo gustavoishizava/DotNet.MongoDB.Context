@@ -1,3 +1,4 @@
+using MeuBolsoDigital.MongoDB.Context.Context.ChangeTracking;
 using MeuBolsoDigital.MongoDB.Context.Context.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -23,16 +24,20 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
 
         public async Task AddAsync(TDocument document)
         {
+            DbContext.ChangeTracker.AddEntry(new(EntryState.Added, document));
             await Collection.InsertOneAsync(DbContext.ClientSessionHandle, document);
         }
 
         public async Task AddRangeAsync(List<TDocument> documents)
         {
+            documents.ForEach(x => DbContext.ChangeTracker.AddEntry(new(EntryState.Added, x)));
             await Collection.InsertManyAsync(DbContext.ClientSessionHandle, documents);
         }
 
         public async Task UpdateAsync(FilterDefinition<TDocument> filter, TDocument document)
         {
+            DbContext.ChangeTracker.AddEntry(new(EntryState.Modified, document));
+
             var update = new BsonDocument { { "$set", document.ToBsonDocument() } };
             await Collection.UpdateOneAsync(DbContext.ClientSessionHandle, filter, update, new() { IsUpsert = true });
         }
