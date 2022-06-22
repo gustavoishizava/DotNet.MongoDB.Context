@@ -12,7 +12,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         private readonly ModelBuilder _modelBuilder = new();
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
-        private IClientSessionHandle _clientSessionHandle { get; set; }
+        public IClientSessionHandle ClientSessionHandle { get; set; }
 
         public IReadOnlyList<ModelMap> ModelMaps => _modelBuilder.ModelMaps;
 
@@ -34,7 +34,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         private void Configure(string databaseName)
         {
             Database = Client.GetDatabase(databaseName);
-            _clientSessionHandle = Client.StartSession();
+            ClientSessionHandle = Client.StartSession();
 
             ConfigureModels();
             RegisterCollections();
@@ -86,27 +86,27 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
 
         public void StartTransaction()
         {
-            if (!_clientSessionHandle.IsInTransaction)
-                _clientSessionHandle.StartTransaction();
+            if (!ClientSessionHandle.IsInTransaction)
+                ClientSessionHandle.StartTransaction();
         }
 
         public async Task CommitAsync()
         {
-            if (_clientSessionHandle.IsInTransaction)
-                await _clientSessionHandle.CommitTransactionAsync();
+            if (ClientSessionHandle.IsInTransaction)
+                await ClientSessionHandle.CommitTransactionAsync();
         }
 
         public async Task RollbackAsync()
         {
-            if (_clientSessionHandle.IsInTransaction)
-                await _clientSessionHandle.AbortTransactionAsync();
+            if (ClientSessionHandle.IsInTransaction)
+                await ClientSessionHandle.AbortTransactionAsync();
         }
 
         #endregion
 
         public void Dispose()
         {
-            _clientSessionHandle.Dispose();
+            ClientSessionHandle.Dispose();
             GC.SuppressFinalize(this);
         }
     }
