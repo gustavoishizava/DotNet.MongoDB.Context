@@ -1,6 +1,9 @@
 using System;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
+using MeuBolsoDigital.MongoDB.Context.Context;
+using MeuBolsoDigital.MongoDB.Context.Context.ModelConfiguration;
 using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -9,6 +12,26 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 {
     public class CreateDbContextTests
     {
+        private class TestDbContext : DbContext
+        {
+            public DbSet<Product> Products { get; set; }
+            public DbSet<Customer> Customers { get; set; }
+            public DbSet<User> Users { get; set; }
+
+            public TestDbContext(MongoDbContextOptions options) : base(options)
+            {
+            }
+
+            public TestDbContext(IMongoClient mongoClient, string databaseName) : base(mongoClient, databaseName)
+            {
+            }
+
+            protected override void OnModelConfiguring(ModelBuilder modelBuilder)
+            {
+                modelBuilder.AddModelMap("customers", new BsonClassMap<Customer>());
+            }
+        }
+
         private Mock<IMongoClient> _mockMongoClient;
         private Mock<IMongoDatabase> _mockMongoDatabase;
         private Mock<IClientSessionHandle> _mockClientSessionHandle;
@@ -27,9 +50,17 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             _mockMongoClient.Setup(x => x.StartSession(null, default))
                 .Returns(_mockClientSessionHandle.Object);
 
-            var mockCollection = new Mock<IMongoCollection<Product>>();
+            var mockProductCollection = new Mock<IMongoCollection<Product>>();
             _mockMongoDatabase.Setup(x => x.GetCollection<Product>(It.IsAny<string>(), null))
-                .Returns(mockCollection.Object);
+                .Returns(mockProductCollection.Object);
+
+            var mockCustomerCollection = new Mock<IMongoCollection<Customer>>();
+            _mockMongoDatabase.Setup(x => x.GetCollection<Customer>(It.IsAny<string>(), null))
+                .Returns(mockCustomerCollection.Object);
+
+            var mockUserCollection = new Mock<IMongoCollection<User>>();
+            _mockMongoDatabase.Setup(x => x.GetCollection<User>(It.IsAny<string>(), null))
+                .Returns(mockUserCollection.Object);
         }
 
         private TestDbContext CreateContext()
@@ -59,6 +90,8 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             Assert.NotNull(context.Database);
             Assert.NotNull(context.ClientSessionHandle);
             Assert.NotNull(context.Products);
+            Assert.NotNull(context.Customers);
+            Assert.NotNull(context.Users);
             Assert.Single(context.ModelMaps);
         }
     }

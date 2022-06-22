@@ -59,9 +59,8 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         private List<PropertyInfo> GetCollectionProperties()
         {
             return GetType().GetProperties()
-                    .Where(x => x.PropertyType.IsInterface
-                                && x.PropertyType.IsGenericType
-                                && x.PropertyType.GetGenericTypeDefinition() == typeof(IMongoCollection<>)).ToList();
+                    .Where(x => x.PropertyType.IsClass
+                                && x.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>)).ToList();
         }
 
         private void RegisterCollections()
@@ -76,9 +75,10 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
                                             .MakeGenericMethod(new[] { documentType });
 
                 var collectionName = _modelBuilder.GetCollectionName(documentType) ?? documentType.Name;
-
                 var mongoCollection = getCollectionMethod.Invoke(Database, new object[] { collectionName, null });
-                property.SetValue(this, mongoCollection);
+                var dbSetType = typeof(DbSet<>).MakeGenericType(new[] { documentType });
+
+                property.SetValue(this, Activator.CreateInstance(dbSetType, new object[] { mongoCollection, this }));
             }
         }
 
