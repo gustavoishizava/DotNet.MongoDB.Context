@@ -1,0 +1,62 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-18.04'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET Core SDK'
+  inputs:
+    version: 6.0.x
+    performMultiLevelLookup: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet restore'
+  inputs:
+    command: 'restore'
+    feedsToUse: 'select'
+
+- task: SonarCloudPrepare@1
+  displayName: 'Sonar prepare'
+  inputs:
+    SonarCloud: 'Sonar Cloud'
+    organization: 'gustavoishizava'
+    scannerMode: 'MSBuild'
+    projectKey: 'gustavoishizava_MeuBolsoDigital.MongoDB.Context'
+    projectName: 'MeuBolsoDigital.MongoDB.Context'
+    extraProperties: |
+          sonar.exclusions=**/*.bin,**/obj/**,**/*.dll
+          sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/**/coverage.opencover.xml
+          sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/*.trx
+
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet build'
+  inputs:
+    command: 'build'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Unit tests'
+  inputs:
+    command: 'test'
+    projects: '**/*.UnitTests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover --collect:"XPlat Code Coverage'
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage report'
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+
+- task: SonarCloudAnalyze@1
+  displayName: 'Sonar analyze'
+
+- task: SonarCloudPublish@1
+  displayName: 'Sonar publish'
+  inputs:
+    pollingTimeoutSec: '300'
