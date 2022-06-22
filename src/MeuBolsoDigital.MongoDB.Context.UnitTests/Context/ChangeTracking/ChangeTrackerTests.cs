@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using MeuBolsoDigital.MongoDB.Context.Context.ChangeTracking;
 using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
 using Xunit;
