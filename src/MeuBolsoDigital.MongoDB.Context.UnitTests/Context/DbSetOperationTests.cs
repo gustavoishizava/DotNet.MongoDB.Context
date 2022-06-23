@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context;
+using MeuBolsoDigital.MongoDB.Context.Context.Operations;
 using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
 using MongoDB.Driver;
 using Moq;
@@ -91,17 +92,22 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
         }
 
         [Fact]
-        public async Task UpdateManyAsync_ReturnSuccess()
+        public async Task UpdateRangeAsync_ReturnSuccess()
         {
             // Arrange
             var context = CreateContext();
             var dbSet = new DbSet<Product>(_mockCollection.Object, context);
 
+            var bulkOperationModels = new List<BulkOperationModel<Product>>()
+            {
+                new(Builders<Product>.Filter.Where(x => x.Name == ""), new Product())
+            };
+
             // Act
-            await dbSet.UpdateManyAsync(Builders<Product>.Filter.Where(x => x.Name == ""), new Product());
+            await dbSet.UpdateRangeAsync(bulkOperationModels);
 
             // Assert
-            _mockCollection.Verify(x => x.UpdateManyAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<FilterDefinition<Product>>(), It.IsAny<UpdateDefinition<Product>>(), It.IsAny<UpdateOptions>(), default), Times.Once);
+            _mockCollection.Verify(x => x.BulkWriteAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<IEnumerable<UpdateOneModel<Product>>>(), It.IsAny<BulkWriteOptions>(), default), Times.Once);
         }
 
         [Fact]

@@ -1,5 +1,6 @@
 using MeuBolsoDigital.MongoDB.Context.Context.ChangeTracking;
 using MeuBolsoDigital.MongoDB.Context.Context.Interfaces;
+using MeuBolsoDigital.MongoDB.Context.Context.Operations;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -42,10 +43,12 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             await Collection.UpdateOneAsync(DbContext.ClientSessionHandle, filter, update, new() { IsUpsert = true });
         }
 
-        public async Task UpdateManyAsync(FilterDefinition<TDocument> filter, TDocument document)
+        public async Task UpdateRangeAsync(List<BulkOperationModel<TDocument>> bulkOperationModels)
         {
-            var update = new BsonDocument { { "$set", document.ToBsonDocument() } };
-            await Collection.UpdateManyAsync(DbContext.ClientSessionHandle, filter, update, new() { IsUpsert = true });
+            bulkOperationModels.ForEach(x => DbContext.ChangeTracker.AddEntry(new(EntryState.Modified, x.Document)));
+
+            var listWrites = bulkOperationModels.Select(x => new UpdateOneModel<TDocument>(x.Filter, x.Document.ToBsonDocument()));
+            await Collection.BulkWriteAsync(DbContext.ClientSessionHandle, listWrites, new() { IsOrdered = true });
         }
 
         public async Task RemoveAsync(FilterDefinition<TDocument> filter)

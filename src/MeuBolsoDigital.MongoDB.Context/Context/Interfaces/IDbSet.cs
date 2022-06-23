@@ -1,3 +1,4 @@
+using MeuBolsoDigital.MongoDB.Context.Context.Operations;
 using MongoDB.Driver;
 
 namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
@@ -10,7 +11,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
         Task AddAsync(TDocument document);
         Task AddRangeAsync(List<TDocument> documents);
         Task UpdateAsync(FilterDefinition<TDocument> filter, TDocument document);
-        Task UpdateManyAsync(FilterDefinition<TDocument> filter, TDocument document);
+        Task UpdateRangeAsync(List<BulkOperationModel<TDocument>> bulkOperationModels);
         Task RemoveAsync(FilterDefinition<TDocument> filter);
         Task RemoveRangeAsync(FilterDefinition<TDocument> filter);
     }
