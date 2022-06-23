@@ -92,7 +92,7 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
                 ClientSessionHandle.StartTransaction();
         }
 
-        public async Task CommitAsync()
+        public virtual async Task CommitAsync()
         {
             if (ClientSessionHandle.IsInTransaction)
                 await ClientSessionHandle.CommitTransactionAsync();
