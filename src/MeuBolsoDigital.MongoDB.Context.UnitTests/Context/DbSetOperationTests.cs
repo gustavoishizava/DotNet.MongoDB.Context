@@ -1,7 +1,9 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context;
+using MeuBolsoDigital.MongoDB.Context.Context.ChangeTracking;
 using MeuBolsoDigital.MongoDB.Context.Context.Operations;
 using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
 using MongoDB.Driver;
@@ -61,6 +63,9 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             // Assert
             _mockCollection.Verify(x => x.InsertOneAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<Product>(), null, default), Times.Once);
+            Assert.Single(context.ChangeTracker.Entries);
+            Assert.Equal(EntryState.Added, context.ChangeTracker.Entries.First().State);
+            Assert.IsType<Product>(context.ChangeTracker.Entries.First().Value);
         }
 
         [Fact]
@@ -69,12 +74,19 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Arrange
             var context = CreateContext();
             var dbSet = new DbSet<Product>(_mockCollection.Object, context);
+            var documents = new List<Product>() { new Product() };
 
             // Act
-            await dbSet.AddRangeAsync(new List<Product>() { new Product() });
+            await dbSet.AddRangeAsync(documents);
 
             // Assert
             _mockCollection.Verify(x => x.InsertManyAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<List<Product>>(), null, default), Times.Once);
+            Assert.Equal(documents.Count(), context.ChangeTracker.Entries.Count());
+            foreach (var entry in context.ChangeTracker.Entries)
+            {
+                Assert.Equal(EntryState.Added, entry.State);
+                Assert.IsType<Product>(entry.Value);
+            }
         }
 
         [Fact]
@@ -89,6 +101,9 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             // Assert
             _mockCollection.Verify(x => x.UpdateOneAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<FilterDefinition<Product>>(), It.IsAny<UpdateDefinition<Product>>(), It.IsAny<UpdateOptions>(), default), Times.Once);
+            Assert.Single(context.ChangeTracker.Entries);
+            Assert.Equal(EntryState.Modified, context.ChangeTracker.Entries.First().State);
+            Assert.IsType<Product>(context.ChangeTracker.Entries.First().Value);
         }
 
         [Fact]
@@ -108,6 +123,12 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             // Assert
             _mockCollection.Verify(x => x.BulkWriteAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<IEnumerable<UpdateOneModel<Product>>>(), It.IsAny<BulkWriteOptions>(), default), Times.Once);
+            Assert.Equal(bulkOperationModels.Count(), context.ChangeTracker.Entries.Count());
+            foreach (var entry in context.ChangeTracker.Entries)
+            {
+                Assert.Equal(EntryState.Modified, entry.State);
+                Assert.IsType<Product>(entry.Value);
+            }
         }
 
         [Fact]
@@ -122,6 +143,9 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             // Assert
             _mockCollection.Verify(x => x.DeleteOneAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<FilterDefinition<Product>>(), null, default), Times.Once);
+            Assert.Single(context.ChangeTracker.Entries);
+            Assert.Equal(EntryState.Deleted, context.ChangeTracker.Entries.First().State);
+            Assert.IsType<Product>(context.ChangeTracker.Entries.First().Value);
         }
 
         [Fact]
@@ -141,6 +165,12 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             // Assert
             _mockCollection.Verify(x => x.BulkWriteAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<IEnumerable<DeleteOneModel<Product>>>(), It.IsAny<BulkWriteOptions>(), default), Times.Once);
+            Assert.Equal(bulkOperationModels.Count(), context.ChangeTracker.Entries.Count());
+            foreach (var entry in context.ChangeTracker.Entries)
+            {
+                Assert.Equal(EntryState.Deleted, entry.State);
+                Assert.IsType<Product>(entry.Value);
+            }
         }
     }
 }
