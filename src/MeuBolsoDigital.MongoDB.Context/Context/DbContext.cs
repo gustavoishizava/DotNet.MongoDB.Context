@@ -96,12 +96,16 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         {
             if (ClientSessionHandle.IsInTransaction)
                 await ClientSessionHandle.CommitTransactionAsync();
+
+            ChangeTracker.Clear();
         }
 
         public async Task RollbackAsync()
         {
             if (ClientSessionHandle.IsInTransaction)
                 await ClientSessionHandle.AbortTransactionAsync();
+
+            ChangeTracker.Clear();
         }
 
         public void Dispose()

@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using MeuBolsoDigital.MongoDB.Context.Configuration;
 using MeuBolsoDigital.MongoDB.Context.Context;
+using MeuBolsoDigital.MongoDB.Context.UnitTests.Context.Common;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -11,6 +12,8 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
     {
         private class TransactionContextTest : DbContext
         {
+            public DbSet<Product> Products { get; set; }
+
             public TransactionContextTest(MongoDbContextOptions options) : base(options)
             {
             }
@@ -37,6 +40,10 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
 
             _mockMongoClient.Setup(x => x.StartSession(null, default))
                 .Returns(_mockClientSessionHandle.Object);
+
+            var mockProductCollection = new Mock<IMongoCollection<Product>>();
+            _mockMongoDatabase.Setup(x => x.GetCollection<Product>(It.IsAny<string>(), null))
+                .Returns(mockProductCollection.Object);
         }
 
         private TransactionContextTest CreateContext()
@@ -86,6 +93,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
                 .Returns(true);
 
             var context = CreateContext();
+            await context.Products.AddAsync(new Product());
 
             // Act
             await context.CommitAsync();
@@ -93,6 +101,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Assert
             _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
             _mockClientSessionHandle.Verify(x => x.CommitTransactionAsync(default), Times.Once);
+            Assert.Empty(context.ChangeTracker.Entries);
         }
 
         [Fact]
@@ -103,6 +112,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
                 .Returns(false);
 
             var context = CreateContext();
+            await context.Products.AddAsync(new Product());
 
             // Act
             await context.CommitAsync();
@@ -110,6 +120,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Assert
             _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
             _mockClientSessionHandle.Verify(x => x.CommitTransactionAsync(default), Times.Never);
+            Assert.Empty(context.ChangeTracker.Entries);
         }
 
         [Fact]
@@ -120,6 +131,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
                 .Returns(true);
 
             var context = CreateContext();
+            await context.Products.AddAsync(new Product());
 
             // Act
             await context.RollbackAsync();
@@ -127,6 +139,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Assert
             _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
             _mockClientSessionHandle.Verify(x => x.AbortTransactionAsync(default), Times.Once);
+            Assert.Empty(context.ChangeTracker.Entries);
         }
 
         [Fact]
@@ -137,6 +150,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
                 .Returns(false);
 
             var context = CreateContext();
+            await context.Products.AddAsync(new Product());
 
             // Act
             await context.RollbackAsync();
@@ -144,6 +158,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             // Assert
             _mockClientSessionHandle.Verify(x => x.IsInTransaction, Times.Once);
             _mockClientSessionHandle.Verify(x => x.AbortTransactionAsync(default), Times.Never);
+            Assert.Empty(context.ChangeTracker.Entries);
         }
     }
 }
