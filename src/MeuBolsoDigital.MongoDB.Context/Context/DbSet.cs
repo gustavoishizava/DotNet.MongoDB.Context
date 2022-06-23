@@ -60,9 +60,12 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             await Collection.DeleteOneAsync(DbContext.ClientSessionHandle, filter);
         }
 
-        public async Task RemoveRangeAsync(FilterDefinition<TDocument> filter)
+        public async Task RemoveRangeAsync(List<BulkOperationModel<TDocument>> bulkOperationModels)
         {
-            await Collection.DeleteManyAsync(DbContext.ClientSessionHandle, filter);
+            bulkOperationModels.ForEach(x => DbContext.ChangeTracker.AddEntry(new(EntryState.Deleted, x.Document)));
+
+            var listWrites = bulkOperationModels.Select(x => new DeleteOneModel<TDocument>(x.Filter));
+            await Collection.BulkWriteAsync(DbContext.ClientSessionHandle, listWrites, new() { IsOrdered = true });
         }
     }
 }

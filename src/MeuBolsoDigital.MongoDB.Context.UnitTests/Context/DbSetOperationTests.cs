@@ -131,11 +131,16 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             var context = CreateContext();
             var dbSet = new DbSet<Product>(_mockCollection.Object, context);
 
+            var bulkOperationModels = new List<BulkOperationModel<Product>>()
+            {
+                new(Builders<Product>.Filter.Where(x => x.Name == ""), new Product())
+            };
+
             // Act
-            await dbSet.RemoveRangeAsync(Builders<Product>.Filter.Where(x => x.Name == ""));
+            await dbSet.RemoveRangeAsync(bulkOperationModels);
 
             // Assert
-            _mockCollection.Verify(x => x.DeleteManyAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<FilterDefinition<Product>>(), null, default), Times.Once);
+            _mockCollection.Verify(x => x.BulkWriteAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<IEnumerable<DeleteOneModel<Product>>>(), It.IsAny<BulkWriteOptions>(), default), Times.Once);
         }
     }
 }

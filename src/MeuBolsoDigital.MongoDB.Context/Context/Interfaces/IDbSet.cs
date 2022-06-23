@@ -13,6 +13,6 @@ namespace MeuBolsoDigital.MongoDB.Context.Context.Interfaces
         Task UpdateAsync(FilterDefinition<TDocument> filter, TDocument document);
         Task UpdateRangeAsync(List<BulkOperationModel<TDocument>> bulkOperationModels);
         Task RemoveAsync(FilterDefinition<TDocument> filter, TDocument document);
-        Task RemoveRangeAsync(FilterDefinition<TDocument> filter);
+        Task RemoveRangeAsync(List<BulkOperationModel<TDocument>> bulkOperationModels);
     }
 }
