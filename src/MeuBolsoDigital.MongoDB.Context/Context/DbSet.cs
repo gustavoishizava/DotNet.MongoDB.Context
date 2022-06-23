@@ -26,12 +26,14 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
         public async Task AddAsync(TDocument document)
         {
             DbContext.ChangeTracker.AddEntry(new(EntryState.Added, document));
+
             await Collection.InsertOneAsync(DbContext.ClientSessionHandle, document);
         }
 
         public async Task AddRangeAsync(List<TDocument> documents)
         {
             documents.ForEach(x => DbContext.ChangeTracker.AddEntry(new(EntryState.Added, x)));
+
             await Collection.InsertManyAsync(DbContext.ClientSessionHandle, documents);
         }
 
@@ -51,8 +53,10 @@ namespace MeuBolsoDigital.MongoDB.Context.Context
             await Collection.BulkWriteAsync(DbContext.ClientSessionHandle, listWrites, new() { IsOrdered = true });
         }
 
-        public async Task RemoveAsync(FilterDefinition<TDocument> filter)
+        public async Task RemoveAsync(FilterDefinition<TDocument> filter, TDocument document)
         {
+            DbContext.ChangeTracker.AddEntry(new(EntryState.Deleted, document));
+
             await Collection.DeleteOneAsync(DbContext.ClientSessionHandle, filter);
         }
 

@@ -118,7 +118,7 @@ namespace MeuBolsoDigital.MongoDB.Context.UnitTests.Context
             var dbSet = new DbSet<Product>(_mockCollection.Object, context);
 
             // Act
-            await dbSet.RemoveAsync(Builders<Product>.Filter.Where(x => x.Name == ""));
+            await dbSet.RemoveAsync(Builders<Product>.Filter.Where(x => x.Name == ""), new Product());
 
             // Assert
             _mockCollection.Verify(x => x.DeleteOneAsync(It.IsAny<IClientSessionHandle>(), It.IsAny<FilterDefinition<Product>>(), null, default), Times.Once);
