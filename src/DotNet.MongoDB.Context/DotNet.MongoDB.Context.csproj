@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <Title>DotNet.MongoDB.Context</Title>
+    <Description>Database context for MongoDB.</Description>
+    <PackageId>DotNet.MongoDB.Context</PackageId>
+    <PackageProjectUrl>https://github.com/gustavoishizava/MeuBolsoDigital.MongoDB.Context</PackageProjectUrl>
+    <PackageTags>Mongo, MongoDB, Context, Repository, Transaction, GenericRepository, BaseRepository, RepositoryBase, CommandRepository, QueryRepository, CQRS, Command, Query</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.16.0"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0"/>
+  </ItemGroup>
+</Project>
