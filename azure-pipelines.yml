@@ -1,3 +1,5 @@
+name: $(majorMinorVersion).$(semanticVersion)
+
 trigger:
 - master
 
@@ -8,6 +10,9 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  majorMinorVersion: 1.0
+  semanticVersion: $[counter(variables['majorMinorVersion'], 0)]
+
 
 steps:
 - task: UseDotNet@2
@@ -66,10 +71,7 @@ steps:
   inputs:
     command: 'pack'
     packagesToPack: '**/*.csproj'
-    versioningScheme: 'byPrereleaseNumber'
-    majorVersion: '1'
-    minorVersion: '0'
-    patchVersion: '0'
+    versioningScheme: 'byBuildNumber'
 
 - task: NuGetCommand@2
   displayName: 'NuGet push'
