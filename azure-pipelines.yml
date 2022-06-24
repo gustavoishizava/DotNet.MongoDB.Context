@@ -28,8 +28,8 @@ steps:
     SonarCloud: 'Sonar Cloud'
     organization: 'gustavoishizava'
     scannerMode: 'MSBuild'
-    projectKey: 'gustavoishizava_MeuBolsoDigital.MongoDB.Context'
-    projectName: 'MeuBolsoDigital.MongoDB.Context'
+    projectKey: 'gustavoishizava_DotNet.MongoDB.Context'
+    projectName: 'DotNet.MongoDB.Context'
     extraProperties: |
           sonar.exclusions=**/*.bin,**/obj/**,**/*.dll
           sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/**/coverage.opencover.xml
@@ -60,3 +60,21 @@ steps:
   displayName: 'Sonar publish'
   inputs:
     pollingTimeoutSec: '300'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet NuGet pack'
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    versioningScheme: 'byPrereleaseNumber'
+    majorVersion: '1'
+    minorVersion: '0'
+    patchVersion: '0'
+
+- task: NuGetCommand@2
+  displayName: 'NuGet push'
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'Nuget Org'
