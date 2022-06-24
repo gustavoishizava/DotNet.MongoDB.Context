@@ -6,8 +6,9 @@
     <Title>DotNet.MongoDB.Context</Title>
     <Description>Database context for MongoDB.</Description>
     <PackageId>Ishizava.MongoDB.Context</PackageId>
-    <PackageProjectUrl>https://github.com/gustavoishizava/DotNet.MongoDB.Context</PackageProjectUrl>
-    <PackageTags>Mongo, MongoDB, Context, Repository, Transaction, GenericRepository, BaseRepository, RepositoryBase, CommandRepository, QueryRepository, CQRS, Command, Query</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/gustavoishizava/DotNet.MongoDB.Context</RepositoryUrl>
+    <PackageTags>Mongo, MongoDB, Context, Repository, Transaction, Session, GenericRepository, BaseRepository, RepositoryBase</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.16.0"/>
