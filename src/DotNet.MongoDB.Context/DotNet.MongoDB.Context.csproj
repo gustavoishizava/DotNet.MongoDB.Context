@@ -6,7 +6,7 @@
     <Title>DotNet.MongoDB.Context</Title>
     <Description>Database context for MongoDB.</Description>
     <PackageId>DotNet.MongoDB.Context</PackageId>
-    <PackageProjectUrl>https://github.com/gustavoishizava/MeuBolsoDigital.MongoDB.Context</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/gustavoishizava/DotNet.MongoDB.Context</PackageProjectUrl>
     <PackageTags>Mongo, MongoDB, Context, Repository, Transaction, GenericRepository, BaseRepository, RepositoryBase, CommandRepository, QueryRepository, CQRS, Command, Query</PackageTags>
   </PropertyGroup>
   <ItemGroup>
