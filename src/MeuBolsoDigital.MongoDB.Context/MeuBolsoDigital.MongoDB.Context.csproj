@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <Title>MeuBolsoDigital.MongoDB.Context</Title>
-    <Description>MeuBolsoDigital.MongoDB.Context</Description>
+    <Description>Database context for MongoDB.</Description>
     <PackageId>MeuBolsoDigital.MongoDB.Context</PackageId>
     <PackageProjectUrl>https://github.com/gustavoishizava/MeuBolsoDigital.MongoDB.Context</PackageProjectUrl>
     <PackageTags>Mongo, MongoDB, Context, Repository, Transaction, GenericRepository, BaseRepository, RepositoryBase, CommandRepository, QueryRepository, CQRS, Command, Query</PackageTags>
