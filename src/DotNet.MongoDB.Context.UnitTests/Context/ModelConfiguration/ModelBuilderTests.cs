@@ -1,7 +1,6 @@
 using System;
 using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using DotNet.MongoDB.Context.UnitTests.Context.Common;
-using MongoDB.Bson.Serialization;
 using Xunit;
 
 namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
@@ -17,19 +16,8 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
             var modelBuilder = new ModelBuilder();
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => modelBuilder.AddModelMap(collectionName, null));
+            var exception = Assert.Throws<ArgumentNullException>(() => modelBuilder.AddModelMap<Customer>(collectionName, null));
             Assert.Equal("Collection name cannot be null. (Parameter 'collectionName')", exception.Message);
-        }
-
-        [Fact]
-        public void BsonClassMapNull_AddModelMap_ReturnArgumentNullException()
-        {
-            // Arrange
-            var modelBuilder = new ModelBuilder();
-
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => modelBuilder.AddModelMap("collectionName", null));
-            Assert.Equal("BsonClassMap cannot be null. (Parameter 'bsonClassMap')", exception.Message);
         }
 
         [Fact]
@@ -40,8 +28,8 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap(collectionName, new BsonClassMap<Customer>());
-            modelBuilder.AddModelMap(collectionName, new BsonClassMap<Customer>());
+            modelBuilder.AddModelMap<Customer>(collectionName, map => { });
+            modelBuilder.AddModelMap<Customer>(collectionName, map => { });
 
             // Assert
             Assert.Single(modelBuilder.ModelMaps);
@@ -54,8 +42,8 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap("products1", new BsonClassMap<Customer>());
-            modelBuilder.AddModelMap("products2", new BsonClassMap<Customer>());
+            modelBuilder.AddModelMap<Customer>("products1", map => { });
+            modelBuilder.AddModelMap<Customer>("products2", map => { });
 
             // Assert
             Assert.Single(modelBuilder.ModelMaps);
@@ -68,8 +56,8 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap("products1", new BsonClassMap<Customer>());
-            modelBuilder.AddModelMap("products2", new BsonClassMap<User>());
+            modelBuilder.AddModelMap<Customer>("products1", map => { });
+            modelBuilder.AddModelMap<User>("products2", map => { });
 
             // Assert
             Assert.Equal(2, modelBuilder.ModelMaps.Count);
@@ -94,7 +82,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
             // Arrange
             var modelBuilder = new ModelBuilder();
             var collectionName = "products";
-            modelBuilder.AddModelMap(collectionName, new BsonClassMap<Customer>());
+            modelBuilder.AddModelMap<Customer>(collectionName, null);
 
             // Act
             var result = modelBuilder.GetCollectionName(typeof(Customer));

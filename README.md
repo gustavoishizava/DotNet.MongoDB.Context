@@ -38,7 +38,7 @@ PM> Install-Package Ishizava.MongoDB.Context
 
         protected override void OnModelConfiguring(ModelBuilder modelBuilder)
         {
-            modelBuilder.AddModelMap("customers", new BsonClassMap<Customer>(map =>
+            modelBuilder.AddModelMap<Customer>("customers", map =>
             {
                 map.MapIdField(x => x.Id);
 
@@ -47,7 +47,7 @@ PM> Install-Package Ishizava.MongoDB.Context
 
                 map.MapProperty(x => x.CreatedAt)
                     .SetElementName("created_at");
-            }));
+            });
         }
     }
 ```

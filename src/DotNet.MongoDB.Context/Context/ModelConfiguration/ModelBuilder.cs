@@ -12,8 +12,13 @@ namespace DotNet.MongoDB.Context.Context.ModelConfiguration
             _modelMaps = new();
         }
 
-        public void AddModelMap(string collectionName, BsonClassMap bsonClassMap)
+        public void AddModelMap<TModel>(string collectionName, Action<BsonClassMap<TModel>> mapConfig = null) where TModel : class
         {
+            var bsonClassMap = new BsonClassMap<TModel>();
+
+            if (mapConfig is not null)
+                mapConfig(bsonClassMap);
+
             var modelMap = new ModelMap(collectionName, bsonClassMap);
             if (ModelMapExists(modelMap))
                 return;

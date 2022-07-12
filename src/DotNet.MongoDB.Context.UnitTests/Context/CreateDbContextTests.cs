@@ -3,7 +3,6 @@ using DotNet.MongoDB.Context.Configuration;
 using DotNet.MongoDB.Context.Context;
 using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using DotNet.MongoDB.Context.UnitTests.Context.Common;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -28,7 +27,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
 
             protected override void OnModelConfiguring(ModelBuilder modelBuilder)
             {
-                modelBuilder.AddModelMap("customers", new BsonClassMap<Customer>());
+                modelBuilder.AddModelMap<Customer>("customers", map => { });
             }
         }
 
