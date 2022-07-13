@@ -4,6 +4,7 @@ using DotNet.MongoDB.Context.Context.ChangeTracking;
 using DotNet.MongoDB.Context.Context.Interfaces;
 using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace DotNet.MongoDB.Context.Context
@@ -23,14 +24,37 @@ namespace DotNet.MongoDB.Context.Context
             if (options is null)
                 throw new ArgumentNullException(nameof(options), "Options cannot be null.");
 
+            ApplyConventions(options.ConventionPack);
+            ApplySerializer(options.Serializers.ToList());
+
             Client = new MongoClient(options.ConnectionString);
             Configure(options.DatabaseName);
         }
 
-        protected DbContext(IMongoClient mongoClient, string databaseName)
+        protected DbContext(IMongoClient mongoClient, string databaseName, MongoDbContextOptions options = null)
         {
+            if (options is not null)
+            {
+                ApplyConventions(options.ConventionPack);
+                ApplySerializer(options.Serializers.ToList());
+            }
+
             Client = mongoClient;
             Configure(databaseName);
+        }
+
+        private void ApplyConventions(ConventionPack conventionPack)
+        {
+            ConventionRegistry.Register("Conventions", conventionPack, _ => true);
+        }
+
+        private void ApplySerializer(List<IBsonSerializer> serializers)
+        {
+            serializers.ForEach(x =>
+            {
+                var type = x.GetType().BaseType.GenericTypeArguments[0];
+                BsonSerializer.RegisterSerializer(type, x);
+            });
         }
 
         private void Configure(string databaseName)

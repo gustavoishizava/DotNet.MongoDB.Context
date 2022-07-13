@@ -3,6 +3,9 @@ using DotNet.MongoDB.Context.Configuration;
 using DotNet.MongoDB.Context.Context;
 using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using DotNet.MongoDB.Context.UnitTests.Context.Common;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -21,7 +24,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
             {
             }
 
-            public TestDbContext(IMongoClient mongoClient, string databaseName) : base(mongoClient, databaseName)
+            public TestDbContext(IMongoClient mongoClient, string databaseName, MongoDbContextOptions options = null) : base(mongoClient, databaseName, options)
             {
             }
 
@@ -42,6 +45,9 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
             _mockMongoDatabase = new Mock<IMongoDatabase>();
             _mockClientSessionHandle = new Mock<IClientSessionHandle>();
             _contextOptions = new MongoDbContextOptions("mongodb://tes123", "TestDB");
+
+            _contextOptions.AddConvention(new CamelCaseElementNameConvention());
+            _contextOptions.AddSerializer(new GuidSerializer(BsonType.String));
 
             _mockMongoClient.Setup(x => x.GetDatabase(_contextOptions.DatabaseName, null))
                 .Returns(_mockMongoDatabase.Object);
@@ -64,7 +70,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
 
         private TestDbContext CreateContext()
         {
-            return new TestDbContext(_mockMongoClient.Object, _contextOptions.DatabaseName);
+            return new TestDbContext(_mockMongoClient.Object, _contextOptions.DatabaseName, _contextOptions);
         }
 
         [Fact]

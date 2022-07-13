@@ -49,6 +49,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Configuration
             Assert.Equal(databaseName, options.DatabaseName);
             Assert.Equal(connectionString, options.ConnectionString);
             Assert.Empty(options.Conventions);
+            Assert.Empty(options.Serializers);
         }
 
         [Fact]

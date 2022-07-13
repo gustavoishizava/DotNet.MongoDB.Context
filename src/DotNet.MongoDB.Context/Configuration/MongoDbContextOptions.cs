@@ -5,13 +5,13 @@ namespace DotNet.MongoDB.Context.Configuration
 {
     public class MongoDbContextOptions
     {
-        private readonly ConventionPack _conventionPack;
         private readonly List<IBsonSerializer> _serializers;
 
+        internal readonly ConventionPack ConventionPack;
         public string ConnectionString { get; private set; }
         public string DatabaseName { get; private set; }
 
-        public IReadOnlyList<IConvention> Conventions => _conventionPack.Conventions.ToList().AsReadOnly();
+        public IReadOnlyList<IConvention> Conventions => ConventionPack.Conventions.ToList().AsReadOnly();
         public IReadOnlyList<IBsonSerializer> Serializers => _serializers.AsReadOnly();
 
         public MongoDbContextOptions(string connectionString, string databaseName) : this()
@@ -21,7 +21,7 @@ namespace DotNet.MongoDB.Context.Configuration
 
         internal MongoDbContextOptions()
         {
-            _conventionPack = new();
+            ConventionPack = new();
             _serializers = new();
         }
 
@@ -49,7 +49,7 @@ namespace DotNet.MongoDB.Context.Configuration
 
         public void AddConvention(IConvention convention)
         {
-            _conventionPack.Add(convention);
+            ConventionPack.Add(convention);
         }
 
         public void AddSerializer(IBsonSerializer bsonSerializer)
