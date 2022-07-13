@@ -1,5 +1,8 @@
 using System;
 using DotNet.MongoDB.Context.Configuration;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson.Serialization.Serializers;
 using Xunit;
 
 namespace DotNet.MongoDB.Context.UnitTests.Configuration
@@ -30,6 +33,48 @@ namespace DotNet.MongoDB.Context.UnitTests.Configuration
             // Act & Assert
             var exception = Assert.Throws<ArgumentNullException>(() => new MongoDbContextOptions("connectionString", databaseName));
             Assert.Equal(exceptionMessage, exception.Message);
+        }
+
+        [Fact]
+        public void CreateNewMongoDbContextOption_ReturnSuccess()
+        {
+            // Arrange
+            var databaseName = Guid.NewGuid().ToString();
+            var connectionString = Guid.NewGuid().ToString();
+
+            // Act
+            var options = new MongoDbContextOptions(connectionString, databaseName);
+
+            // Assert
+            Assert.Equal(databaseName, options.DatabaseName);
+            Assert.Equal(connectionString, options.ConnectionString);
+            Assert.Empty(options.Conventions);
+        }
+
+        [Fact]
+        public void AddConvention_ReturnSuccess()
+        {
+            // Arrange
+            var options = new MongoDbContextOptions(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+
+            // Act
+            options.AddConvention(new CamelCaseElementNameConvention());
+
+            // Assert
+            Assert.Single(options.Conventions);
+        }
+
+        [Fact]
+        public void AddSerializer_ReturnSuccess()
+        {
+            // Arrange
+            var options = new MongoDbContextOptions(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+
+            // Act
+            options.AddSerializer(new GuidSerializer(BsonType.String));
+
+            // Assert
+            Assert.Single(options.Serializers);
         }
     }
 }

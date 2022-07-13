@@ -1,17 +1,28 @@
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
+
 namespace DotNet.MongoDB.Context.Configuration
 {
     public class MongoDbContextOptions
     {
+        private readonly ConventionPack _conventionPack;
+        private readonly List<IBsonSerializer> _serializers;
+
         public string ConnectionString { get; private set; }
         public string DatabaseName { get; private set; }
 
-        public MongoDbContextOptions(string connectionString, string databaseName)
+        public IReadOnlyList<IConvention> Conventions => _conventionPack.Conventions.ToList().AsReadOnly();
+        public IReadOnlyList<IBsonSerializer> Serializers => _serializers.AsReadOnly();
+
+        public MongoDbContextOptions(string connectionString, string databaseName) : this()
         {
             ConfigureConnection(connectionString, databaseName);
         }
 
         internal MongoDbContextOptions()
         {
+            _conventionPack = new();
+            _serializers = new();
         }
 
         public void ConfigureConnection(string connectionString, string databaseName)
@@ -34,6 +45,16 @@ namespace DotNet.MongoDB.Context.Configuration
                 throw new ArgumentNullException(nameof(databaseName), "Database name cannot be null.");
 
             DatabaseName = databaseName;
+        }
+
+        public void AddConvention(IConvention convention)
+        {
+            _conventionPack.Add(convention);
+        }
+
+        public void AddSerializer(IBsonSerializer bsonSerializer)
+        {
+            _serializers.Add(bsonSerializer);
         }
     }
 }
