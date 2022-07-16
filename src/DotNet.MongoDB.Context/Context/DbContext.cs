@@ -25,7 +25,7 @@ namespace DotNet.MongoDB.Context.Context
                 throw new ArgumentNullException(nameof(options), "Options cannot be null.");
 
             ApplyConventions(options.ConventionPack);
-            ApplySerializer(options.Serializers.ToList());
+            ApplySerializer(options.Serializers);
 
             Client = new MongoClient(options.ConnectionString);
             Configure(options.DatabaseName);
@@ -36,7 +36,7 @@ namespace DotNet.MongoDB.Context.Context
             if (options is not null)
             {
                 ApplyConventions(options.ConventionPack);
-                ApplySerializer(options.Serializers.ToList());
+                ApplySerializer(options.Serializers);
             }
 
             Client = mongoClient;
@@ -48,12 +48,16 @@ namespace DotNet.MongoDB.Context.Context
             ConventionRegistry.Register("Conventions", conventionPack, _ => true);
         }
 
-        private void ApplySerializer(List<IBsonSerializer> serializers)
+        private void ApplySerializer(List<Serializer> serializers)
         {
             serializers.ForEach(x =>
             {
-                var type = x.GetType().BaseType.GenericTypeArguments[0];
-                BsonSerializer.RegisterSerializer(type, x);
+                if (x.Registered)
+                    return;
+
+                var type = x.BsonSerializer.GetType().BaseType.GenericTypeArguments[0];
+                BsonSerializer.RegisterSerializer(type, x.BsonSerializer);
+                x.Register();
             });
         }
 

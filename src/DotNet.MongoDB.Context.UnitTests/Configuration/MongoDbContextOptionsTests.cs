@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DotNet.MongoDB.Context.Configuration;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
@@ -70,12 +71,14 @@ namespace DotNet.MongoDB.Context.UnitTests.Configuration
         {
             // Arrange
             var options = new MongoDbContextOptions(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            var bsonSerializer = new GuidSerializer(BsonType.String);
 
             // Act
-            options.AddSerializer(new GuidSerializer(BsonType.String));
+            options.AddSerializer(bsonSerializer);
 
             // Assert
             Assert.Single(options.Serializers);
+            Assert.Equal(bsonSerializer, options.Serializers.First().BsonSerializer);
         }
     }
 }
