@@ -3,7 +3,6 @@ using System;
 using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using DotNet.MongoDB.Context.UnitTests.Context.Common;
 using Xunit;
-using MongoDB.Bson.Serialization;
 
 namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
 {
