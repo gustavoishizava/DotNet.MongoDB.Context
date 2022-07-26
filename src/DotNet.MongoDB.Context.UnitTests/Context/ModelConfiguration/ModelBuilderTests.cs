@@ -101,8 +101,8 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
             modelBuilder.AddModelMap<User>(map => { });
 
             // Assert
-            var customerMap = modelBuilder.ModelMaps.First(x => x.BsonClassMap.GetType() == typeof(BsonClassMap<Customer>));
-            var userMap = modelBuilder.ModelMaps.First(x => x.BsonClassMap.GetType() == typeof(BsonClassMap<User>));
+            var customerMap = modelBuilder.ModelMaps.First(x => x.BsonClassMap.ClassType == typeof(Customer));
+            var userMap = modelBuilder.ModelMaps.First(x => x.BsonClassMap.ClassType == typeof(User));
 
             Assert.Equal(2, modelBuilder.ModelMaps.Count);
 
