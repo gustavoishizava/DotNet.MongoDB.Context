@@ -6,8 +6,9 @@ namespace DotNet.MongoDB.Context.Context.ModelConfiguration
     {
         public string CollectionName { get; private init; }
         public BsonClassMap BsonClassMap { get; private init; }
+        public bool IsCollection { get; private init; }
 
-        internal ModelMap(string collectionName, BsonClassMap bsonClassMap)
+        internal ModelMap(string collectionName, BsonClassMap bsonClassMap, bool isCollection)
         {
             if (string.IsNullOrEmpty(collectionName))
                 throw new ArgumentNullException(nameof(collectionName), "Collection name cannot be null.");
@@ -17,6 +18,7 @@ namespace DotNet.MongoDB.Context.Context.ModelConfiguration
 
             CollectionName = collectionName;
             BsonClassMap = bsonClassMap;
+            IsCollection = isCollection;
         }
     }
 }

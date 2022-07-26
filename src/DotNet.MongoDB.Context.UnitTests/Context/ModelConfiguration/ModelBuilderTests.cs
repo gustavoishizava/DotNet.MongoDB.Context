@@ -1,7 +1,9 @@
+using System.Linq;
 using System;
 using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using DotNet.MongoDB.Context.UnitTests.Context.Common;
 using Xunit;
+using MongoDB.Bson.Serialization;
 
 namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
 {
@@ -21,10 +23,10 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
         }
 
         [Fact]
-        public void ModelMapExists_SameCollectionName_AddModelMap_DoNothing()
+        public void IsCollection_ModelMapExists_SameCollectionName_AddModelMap_DoNothing()
         {
             // Arrange
-            var collectionName = "products";
+            var collectionName = "customers";
             var modelBuilder = new ModelBuilder();
 
             // Act
@@ -36,31 +38,81 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
         }
 
         [Fact]
-        public void ModelMapExists_SameClassType_AddModelMap_DoNothing()
+        public void IsCollection_ModelMapExists_SameClassType_AddModelMap_DoNothing()
         {
             // Arrange
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap<Customer>("products1", map => { });
-            modelBuilder.AddModelMap<Customer>("products2", map => { });
+            modelBuilder.AddModelMap<Customer>("customers1", map => { });
+            modelBuilder.AddModelMap<Customer>("customers2", map => { });
 
             // Assert
             Assert.Single(modelBuilder.ModelMaps);
         }
 
         [Fact]
-        public void AddModelMap_ReturnSuccess()
+        public void IsNotCollection_ModelMapExists_SameClassType_AddModelMap_DoNothing()
         {
             // Arrange
             var modelBuilder = new ModelBuilder();
 
             // Act
-            modelBuilder.AddModelMap<Customer>("products1", map => { });
-            modelBuilder.AddModelMap<User>("products2", map => { });
+            modelBuilder.AddModelMap<Customer>(map => { });
+            modelBuilder.AddModelMap<Customer>(map => { });
 
             // Assert
+            Assert.Single(modelBuilder.ModelMaps);
+        }
+
+        [Fact]
+        public void IsCollection_AddModelMap_ReturnSuccess()
+        {
+            // Arrange
+            var modelBuilder = new ModelBuilder();
+
+            // Act
+            modelBuilder.AddModelMap<Customer>("customer", map => { });
+            modelBuilder.AddModelMap<User>("users", map => { });
+
+            // Assert
+            var customerMap = modelBuilder.ModelMaps.First(x => x.CollectionName == "customer");
+            var userMap = modelBuilder.ModelMaps.First(x => x.CollectionName == "users");
+
             Assert.Equal(2, modelBuilder.ModelMaps.Count);
+
+            Assert.NotNull(customerMap);
+            Assert.NotNull(customerMap.BsonClassMap);
+            Assert.True(customerMap.IsCollection);
+
+            Assert.NotNull(userMap);
+            Assert.NotNull(userMap.BsonClassMap);
+            Assert.True(userMap.IsCollection);
+        }
+
+        [Fact]
+        public void IsNotCollection_AddModelMap_ReturnSuccess()
+        {
+            // Arrange
+            var modelBuilder = new ModelBuilder();
+
+            // Act
+            modelBuilder.AddModelMap<Customer>(map => { });
+            modelBuilder.AddModelMap<User>(map => { });
+
+            // Assert
+            var customerMap = modelBuilder.ModelMaps.First(x => x.BsonClassMap.GetType() == typeof(BsonClassMap<Customer>));
+            var userMap = modelBuilder.ModelMaps.First(x => x.BsonClassMap.GetType() == typeof(BsonClassMap<User>));
+
+            Assert.Equal(2, modelBuilder.ModelMaps.Count);
+
+            Assert.NotNull(customerMap);
+            Assert.NotNull(customerMap.BsonClassMap);
+            Assert.False(customerMap.IsCollection);
+
+            Assert.NotNull(userMap);
+            Assert.NotNull(userMap.BsonClassMap);
+            Assert.False(userMap.IsCollection);
         }
 
         [Fact]
@@ -68,6 +120,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context.ModelConfiguration
         {
             // Arrange
             var modelBuilder = new ModelBuilder();
+            modelBuilder.AddModelMap<Customer>(map => { });
 
             // Act
             var result = modelBuilder.GetCollectionName(typeof(Customer));

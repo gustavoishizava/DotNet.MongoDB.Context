@@ -14,12 +14,23 @@ namespace DotNet.MongoDB.Context.Context.ModelConfiguration
 
         public void AddModelMap<TModel>(string collectionName, Action<BsonClassMap<TModel>> mapConfig = null) where TModel : class
         {
+            AddModelMap<TModel>(collectionName, true, mapConfig);
+        }
+
+        public void AddModelMap<TModel>(Action<BsonClassMap<TModel>> mapConfig = null) where TModel : class
+        {
+            var typeName = $"{typeof(TModel).Name}-{Guid.NewGuid()}";
+            AddModelMap<TModel>(typeName, false, mapConfig);
+        }
+
+        private void AddModelMap<TModel>(string collectionName, bool isCollection, Action<BsonClassMap<TModel>> mapConfig = null) where TModel : class
+        {
             var bsonClassMap = new BsonClassMap<TModel>();
 
             if (mapConfig is not null)
                 mapConfig(bsonClassMap);
 
-            var modelMap = new ModelMap(collectionName, bsonClassMap);
+            var modelMap = new ModelMap(collectionName, bsonClassMap, isCollection);
             if (ModelMapExists(modelMap))
                 return;
 
@@ -28,7 +39,7 @@ namespace DotNet.MongoDB.Context.Context.ModelConfiguration
 
         public string GetCollectionName(Type type)
         {
-            return _modelMaps.FirstOrDefault(x => x.BsonClassMap.ClassType == type)?.CollectionName;
+            return _modelMaps.FirstOrDefault(x => x.BsonClassMap.ClassType == type && x.IsCollection)?.CollectionName;
         }
 
         private bool ModelMapExists(ModelMap modelMap)
