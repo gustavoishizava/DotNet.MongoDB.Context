@@ -49,7 +49,7 @@ namespace DotNet.MongoDB.Context.Context
         {
             bulkOperationModels.ForEach(x => DbContext.ChangeTracker.AddEntry(new(EntryState.Modified, x.Document)));
 
-            var listWrites = bulkOperationModels.Select(x => new UpdateOneModel<TDocument>(x.Filter, x.Document.ToBsonDocument()));
+            var listWrites = bulkOperationModels.Select(x => new UpdateOneModel<TDocument>(x.Filter, x.Document.ToBsonDocument()) { IsUpsert = true });
             await Collection.BulkWriteAsync(DbContext.ClientSessionHandle, listWrites, new() { IsOrdered = true });
         }
 
