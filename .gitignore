@@ -6,6 +6,9 @@
 # IDE
 .vscode
 
+# Samples
+samples
+
 # User-specific files
 *.rsuser
 *.suo
