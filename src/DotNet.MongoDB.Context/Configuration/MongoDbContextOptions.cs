@@ -1,3 +1,4 @@
+using DotNet.MongoDB.Context.Mapping;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 
@@ -6,6 +7,7 @@ namespace DotNet.MongoDB.Context.Configuration
     public class MongoDbContextOptions
     {
         public readonly List<Serializer> Serializers;
+        public readonly List<IBsonClassMapConfiguration> BsonClassMapConfigurations;
         internal readonly ConventionPack ConventionPack;
         public string ConnectionString { get; private set; }
         public string DatabaseName { get; private set; }
@@ -21,6 +23,7 @@ namespace DotNet.MongoDB.Context.Configuration
         {
             ConventionPack = new();
             Serializers = new();
+            BsonClassMapConfigurations = new();
         }
 
         public void ConfigureConnection(string connectionString, string databaseName)
@@ -53,6 +56,11 @@ namespace DotNet.MongoDB.Context.Configuration
         public void AddSerializer(IBsonSerializer bsonSerializer)
         {
             Serializers.Add(new Serializer(bsonSerializer));
+        }
+
+        public void AddBsonClassMap(BsonClassMapConfiguration bsonClassMapConfiguration)
+        {
+            BsonClassMapConfigurations.Add(bsonClassMapConfiguration);
         }
     }
 }

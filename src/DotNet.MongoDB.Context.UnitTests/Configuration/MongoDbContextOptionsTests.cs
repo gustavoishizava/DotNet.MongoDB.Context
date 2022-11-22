@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using DotNet.MongoDB.Context.Configuration;
+using DotNet.MongoDB.Context.Mapping;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 using Xunit;
@@ -10,6 +12,18 @@ namespace DotNet.MongoDB.Context.UnitTests.Configuration
 {
     public class MongoDbContextOptionsTests
     {
+        private class FakeMapping : BsonClassMapConfiguration
+        {
+            public FakeMapping()
+            {
+            }
+
+            public override BsonClassMap GetConfiguration()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -51,6 +65,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Configuration
             Assert.Equal(connectionString, options.ConnectionString);
             Assert.Empty(options.Conventions);
             Assert.Empty(options.Serializers);
+            Assert.Empty(options.BsonClassMapConfigurations);
         }
 
         [Fact]
@@ -79,6 +94,20 @@ namespace DotNet.MongoDB.Context.UnitTests.Configuration
             // Assert
             Assert.Single(options.Serializers);
             Assert.Equal(bsonSerializer, options.Serializers.First().BsonSerializer);
+        }
+
+        [Fact]
+        public void AddBsonClassMapConfiguration_ReturnSuccess()
+        {
+            // Arrange
+            var options = new MongoDbContextOptions(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            var bsonClassMapConfiguration = new FakeMapping();
+            // Act
+            options.AddBsonClassMap(bsonClassMapConfiguration);
+
+            // Assert
+            Assert.Single(options.BsonClassMapConfigurations);
+            Assert.Equal(bsonClassMapConfiguration, options.BsonClassMapConfigurations.First());
         }
     }
 }

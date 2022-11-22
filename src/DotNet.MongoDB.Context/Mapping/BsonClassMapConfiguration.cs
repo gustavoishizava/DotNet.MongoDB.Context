@@ -2,10 +2,11 @@ using MongoDB.Bson.Serialization;
 
 namespace DotNet.MongoDB.Context.Mapping
 {
-    public abstract class BsonClassMapConfiguration<TModel> : IBsonClassMapConfiguration<TModel>
+    public abstract class BsonClassMapConfiguration : IBsonClassMapConfiguration
     {
         public string CollectionName { get; private init; }
         public bool IsEntity => !string.IsNullOrEmpty(CollectionName);
+        public BsonClassMap BsonClassMap { get; private set; }
 
         protected BsonClassMapConfiguration(string collectionName)
         {
@@ -21,14 +22,14 @@ namespace DotNet.MongoDB.Context.Mapping
 
         public void Apply()
         {
-            var bsonClassMap = GetConfiguration();
+            BsonClassMap = GetConfiguration();
 
-            if (bsonClassMap is null || MapExists(typeof(TModel)))
+            if (BsonClassMap is null || MapExists(BsonClassMap.ClassType))
                 return;
 
-            BsonClassMap.RegisterClassMap(bsonClassMap);
+            BsonClassMap.RegisterClassMap(BsonClassMap);
         }
 
-        public abstract BsonClassMap<TModel> GetConfiguration();
+        public abstract BsonClassMap GetConfiguration();
     }
 }

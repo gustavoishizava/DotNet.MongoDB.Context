@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using DotNet.MongoDB.Context.Mapping;
 using DotNet.MongoDB.Context.UnitTests.Context.Common;
 using MongoDB.Bson.Serialization;
@@ -9,7 +8,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Mapping
 {
     public class BsonClassMapConfigurationTests
     {
-        public class FakeMapping : BsonClassMapConfiguration<Customer>
+        public class FakeMapping : BsonClassMapConfiguration
         {
             public FakeMapping() : base()
             {
@@ -27,7 +26,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Mapping
             }
         }
 
-        public class FakeMappingNullMap : BsonClassMapConfiguration<Customer>
+        public class FakeMappingNullMap : BsonClassMapConfiguration
         {
             public FakeMappingNullMap() : base()
             {
@@ -107,6 +106,8 @@ namespace DotNet.MongoDB.Context.UnitTests.Mapping
 
             // Assert
             Assert.Single(BsonClassMap.GetRegisteredClassMaps());
+            Assert.False(map.IsEntity);
+            Assert.NotNull(map.BsonClassMap);
         }
     }
 }

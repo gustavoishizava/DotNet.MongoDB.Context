@@ -2,11 +2,12 @@ using MongoDB.Bson.Serialization;
 
 namespace DotNet.MongoDB.Context.Mapping
 {
-    public interface IBsonClassMapConfiguration<TModel>
+    public interface IBsonClassMapConfiguration
     {
         string CollectionName { get; }
+        BsonClassMap BsonClassMap { get; }
         bool IsEntity { get; }
-        BsonClassMap<TModel> GetConfiguration();
+        BsonClassMap GetConfiguration();
         void Apply();
     }
 }

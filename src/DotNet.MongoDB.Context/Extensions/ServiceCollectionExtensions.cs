@@ -12,6 +12,8 @@ namespace DotNet.MongoDB.Context.Extensions
             var mongoDbContextOptions = new MongoDbContextOptions();
             options(mongoDbContextOptions);
 
+            mongoDbContextOptions.BsonClassMapConfigurations.ForEach(x => x.Apply());
+
             var client = new MongoClient(mongoDbContextOptions.ConnectionString);
 
             services.AddSingleton<IMongoClient>(client)
