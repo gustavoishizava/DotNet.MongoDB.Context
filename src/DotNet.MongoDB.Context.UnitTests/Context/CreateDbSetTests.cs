@@ -12,11 +12,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
     {
         private class DbSetContextTest : DbContext
         {
-            public DbSetContextTest(MongoDbContextOptions options) : base(options)
-            {
-            }
-
-            public DbSetContextTest(IMongoClient mongoClient, string databaseName) : base(mongoClient, databaseName)
+            public DbSetContextTest(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options) : base(mongoClient, mongoDatabase, options)
             {
             }
         }
@@ -42,7 +38,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
 
         private DbSetContextTest CreateContext()
         {
-            return new DbSetContextTest(_mockMongoClient.Object, _contextOptions.DatabaseName);
+            return new DbSetContextTest(_mockMongoClient.Object, _mockMongoDatabase.Object, _contextOptions);
         }
 
         [Fact]

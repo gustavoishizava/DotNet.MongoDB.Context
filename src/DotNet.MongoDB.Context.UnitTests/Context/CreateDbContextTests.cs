@@ -20,11 +20,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
             public DbSet<Customer> Customers { get; set; }
             public DbSet<User> Users { get; set; }
 
-            public TestDbContext(MongoDbContextOptions options) : base(options)
-            {
-            }
-
-            public TestDbContext(IMongoClient mongoClient, string databaseName, MongoDbContextOptions options = null) : base(mongoClient, databaseName, options)
+            public TestDbContext(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options) : base(mongoClient, mongoDatabase, options)
             {
             }
 
@@ -70,7 +66,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
 
         private TestDbContext CreateContext()
         {
-            return new TestDbContext(_mockMongoClient.Object, _contextOptions.DatabaseName, _contextOptions);
+            return new TestDbContext(_mockMongoClient.Object, _mockMongoDatabase.Object, _contextOptions);
         }
 
         [Fact]
@@ -80,7 +76,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
             var exceptionMessage = "Options cannot be null. (Parameter 'options')";
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => new TestDbContext(null));
+            var exception = Assert.Throws<ArgumentNullException>(() => new TestDbContext(_mockMongoClient.Object, _mockMongoDatabase.Object, null));
             Assert.Equal(exceptionMessage, exception.Message);
         }
 

@@ -1,5 +1,5 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNet.MongoDB.Context.Configuration;
 using DotNet.MongoDB.Context.Context;
@@ -16,11 +16,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
     {
         private class DbSetOperationContextTest : DbContext
         {
-            public DbSetOperationContextTest(MongoDbContextOptions options) : base(options)
-            {
-            }
-
-            public DbSetOperationContextTest(IMongoClient mongoClient, string databaseName) : base(mongoClient, databaseName)
+            public DbSetOperationContextTest(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options) : base(mongoClient, mongoDatabase, options)
             {
             }
         }
@@ -48,7 +44,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
 
         private DbSetOperationContextTest CreateContext()
         {
-            return new DbSetOperationContextTest(_mockMongoClient.Object, _contextOptions.DatabaseName);
+            return new DbSetOperationContextTest(_mockMongoClient.Object, _mockMongoDatabase.Object, _contextOptions);
         }
 
         [Fact]

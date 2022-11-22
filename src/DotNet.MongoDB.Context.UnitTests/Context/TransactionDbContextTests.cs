@@ -14,11 +14,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
         {
             public DbSet<Product> Products { get; set; }
 
-            public TransactionContextTest(MongoDbContextOptions options) : base(options)
-            {
-            }
-
-            public TransactionContextTest(IMongoClient mongoClient, string databaseName) : base(mongoClient, databaseName)
+            public TransactionContextTest(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options) : base(mongoClient, mongoDatabase, options)
             {
             }
         }
@@ -48,7 +44,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
 
         private TransactionContextTest CreateContext()
         {
-            return new TransactionContextTest(_mockMongoClient.Object, _contextOptions.DatabaseName);
+            return new TransactionContextTest(_mockMongoClient.Object, _mockMongoDatabase.Object, _contextOptions);
         }
 
         [Fact]

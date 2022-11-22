@@ -1,6 +1,7 @@
 using DotNet.MongoDB.Context.Configuration;
 using DotNet.MongoDB.Context.Context;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 namespace DotNet.MongoDB.Context.Extensions
 {
@@ -10,6 +11,11 @@ namespace DotNet.MongoDB.Context.Extensions
         {
             var mongoDbContextOptions = new MongoDbContextOptions();
             options(mongoDbContextOptions);
+
+            var client = new MongoClient(mongoDbContextOptions.ConnectionString);
+
+            services.AddSingleton<IMongoClient>(client)
+                    .AddSingleton<IMongoDatabase>(client.GetDatabase(mongoDbContextOptions.DatabaseName));
 
             services.AddSingleton(mongoDbContextOptions)
                     .AddScoped<TContext>();

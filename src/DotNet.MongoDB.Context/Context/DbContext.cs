@@ -19,7 +19,7 @@ namespace DotNet.MongoDB.Context.Context
 
         public IReadOnlyList<ModelMap> ModelMaps => _modelBuilder.ModelMaps;
 
-        protected DbContext(MongoDbContextOptions options)
+        protected DbContext(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options)
         {
             if (options is null)
                 throw new ArgumentNullException(nameof(options), "Options cannot be null.");
@@ -27,20 +27,14 @@ namespace DotNet.MongoDB.Context.Context
             ApplyConventions(options.ConventionPack);
             ApplySerializer(options.Serializers);
 
-            Client = new MongoClient(options.ConnectionString);
-            Configure(options.DatabaseName);
-        }
-
-        protected DbContext(IMongoClient mongoClient, string databaseName, MongoDbContextOptions options = null)
-        {
-            if (options is not null)
-            {
-                ApplyConventions(options.ConventionPack);
-                ApplySerializer(options.Serializers);
-            }
-
             Client = mongoClient;
-            Configure(databaseName);
+            Database = mongoDatabase;
+
+            ClientSessionHandle = Client.StartSession();
+            ChangeTracker = new();
+
+            ConfigureModels();
+            RegisterCollections();
         }
 
         private void ApplyConventions(ConventionPack conventionPack)
@@ -59,16 +53,6 @@ namespace DotNet.MongoDB.Context.Context
                 BsonSerializer.RegisterSerializer(type, x.BsonSerializer);
                 x.Register();
             });
-        }
-
-        private void Configure(string databaseName)
-        {
-            Database = Client.GetDatabase(databaseName);
-            ClientSessionHandle = Client.StartSession();
-            ChangeTracker = new();
-
-            ConfigureModels();
-            RegisterCollections();
         }
 
         protected virtual void OnModelConfiguring(ModelBuilder modelBuilder)

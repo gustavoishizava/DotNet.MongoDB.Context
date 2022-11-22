@@ -13,7 +13,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Extensions
     {
         private class ExtensionsContextTest : DbContext
         {
-            public ExtensionsContextTest(MongoDbContextOptions options) : base(options)
+            public ExtensionsContextTest(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options) : base(mongoClient, mongoDatabase, options)
             {
             }
         }
@@ -49,14 +49,20 @@ namespace DotNet.MongoDB.Context.UnitTests.Extensions
                 options.ConfigureConnection(_contextOptions.ConnectionString, _contextOptions.DatabaseName);
             });
 
+            var mongoClient = services.FirstOrDefault(x => x.ServiceType == typeof(IMongoClient));
+            var mongoDatabase = services.FirstOrDefault(x => x.ServiceType == typeof(IMongoDatabase));
             var context = services.FirstOrDefault(x => x.ImplementationType == typeof(ExtensionsContextTest));
             var options = services.FirstOrDefault(x => x.ServiceType == typeof(MongoDbContextOptions));
 
             // Assert
-            Assert.NotNull(context);
+            Assert.NotNull(mongoClient);
+            Assert.Equal(ServiceLifetime.Singleton, mongoClient.Lifetime);
+            Assert.NotNull(mongoDatabase);
+            Assert.Equal(ServiceLifetime.Singleton, mongoDatabase.Lifetime);
             Assert.NotNull(options);
-            Assert.Equal(ServiceLifetime.Scoped, context.Lifetime);
             Assert.Equal(ServiceLifetime.Singleton, options.Lifetime);
+            Assert.NotNull(context);
+            Assert.Equal(ServiceLifetime.Scoped, context.Lifetime);
         }
     }
 }
