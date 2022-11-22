@@ -1,7 +1,6 @@
 using System;
 using DotNet.MongoDB.Context.Configuration;
 using DotNet.MongoDB.Context.Context;
-using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using DotNet.MongoDB.Context.UnitTests.Context.Common;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
@@ -22,11 +21,6 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
 
             public TestDbContext(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options) : base(mongoClient, mongoDatabase, options)
             {
-            }
-
-            protected override void OnModelConfiguring(ModelBuilder modelBuilder)
-            {
-                modelBuilder.AddModelMap<Customer>("customers", map => { });
             }
         }
 
@@ -94,7 +88,6 @@ namespace DotNet.MongoDB.Context.UnitTests.Context
             Assert.NotNull(context.Products);
             Assert.NotNull(context.Customers);
             Assert.NotNull(context.Users);
-            Assert.Single(context.ModelMaps);
         }
     }
 }

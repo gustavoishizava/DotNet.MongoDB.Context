@@ -58,7 +58,7 @@ namespace DotNet.MongoDB.Context.Configuration
             Serializers.Add(new Serializer(bsonSerializer));
         }
 
-        public void AddBsonClassMap(BsonClassMapConfiguration bsonClassMapConfiguration)
+        public void AddBsonClassMap(IBsonClassMapConfiguration bsonClassMapConfiguration)
         {
             BsonClassMapConfigurations.Add(bsonClassMapConfiguration);
         }

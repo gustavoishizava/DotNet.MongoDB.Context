@@ -2,7 +2,6 @@ using System.Reflection;
 using DotNet.MongoDB.Context.Configuration;
 using DotNet.MongoDB.Context.Context.ChangeTracking;
 using DotNet.MongoDB.Context.Context.Interfaces;
-using DotNet.MongoDB.Context.Context.ModelConfiguration;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
@@ -11,18 +10,18 @@ namespace DotNet.MongoDB.Context.Context
 {
     public abstract class DbContext : IDbContext, IDisposable
     {
-        private readonly ModelBuilder _modelBuilder = new();
         public IMongoClient Client { get; private set; }
         public IMongoDatabase Database { get; private set; }
         public IClientSessionHandle ClientSessionHandle { get; private set; }
         public ChangeTracker ChangeTracker { get; private set; }
-
-        public IReadOnlyList<ModelMap> ModelMaps => _modelBuilder.ModelMaps;
+        private readonly MongoDbContextOptions _options;
 
         protected DbContext(IMongoClient mongoClient, IMongoDatabase mongoDatabase, MongoDbContextOptions options)
         {
             if (options is null)
                 throw new ArgumentNullException(nameof(options), "Options cannot be null.");
+
+            _options = options;
 
             ApplyConventions(options.ConventionPack);
             ApplySerializer(options.Serializers);
@@ -33,7 +32,6 @@ namespace DotNet.MongoDB.Context.Context
             ClientSessionHandle = Client.StartSession();
             ChangeTracker = new();
 
-            ConfigureModels();
             RegisterCollections();
         }
 
@@ -55,22 +53,6 @@ namespace DotNet.MongoDB.Context.Context
             });
         }
 
-        protected virtual void OnModelConfiguring(ModelBuilder modelBuilder)
-        {
-        }
-
-        private void ConfigureModels()
-        {
-            var method = GetType().GetMethod(nameof(DbContext.OnModelConfiguring), BindingFlags.Instance | BindingFlags.NonPublic);
-            method.Invoke(this, new object[] { _modelBuilder });
-
-            foreach (var map in _modelBuilder.ModelMaps)
-            {
-                if (!BsonClassMap.IsClassMapRegistered(map.BsonClassMap.ClassType))
-                    BsonClassMap.RegisterClassMap(map.BsonClassMap);
-            }
-        }
-
         private List<PropertyInfo> GetCollectionProperties()
         {
             return GetType().GetProperties()
@@ -90,7 +72,8 @@ namespace DotNet.MongoDB.Context.Context
                 var getCollectionMethod = Database.GetType().GetMethod(nameof(IMongoDatabase.GetCollection))
                                             .MakeGenericMethod(new[] { documentType });
 
-                var collectionName = _modelBuilder.GetCollectionName(documentType) ?? documentType.Name;
+                var mapping = _options.BsonClassMapConfigurations.FirstOrDefault(x => x.BsonClassMap.ClassType == documentType);
+                var collectionName = mapping?.CollectionName ?? documentType.Name;
                 var mongoCollection = getCollectionMethod.Invoke(Database, new object[] { collectionName, null });
                 var dbSetType = typeof(DbSet<>).MakeGenericType(new[] { documentType });
 
