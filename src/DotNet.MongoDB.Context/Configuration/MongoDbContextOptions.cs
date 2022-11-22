@@ -6,7 +6,7 @@ namespace DotNet.MongoDB.Context.Configuration
 {
     public class MongoDbContextOptions
     {
-        public readonly List<Serializer> Serializers;
+        public readonly List<IBsonSerializer> Serializers;
         public readonly List<IBsonClassMapConfiguration> BsonClassMapConfigurations;
         internal readonly ConventionPack ConventionPack;
         public string ConnectionString { get; private set; }
@@ -55,7 +55,7 @@ namespace DotNet.MongoDB.Context.Configuration
 
         public void AddSerializer(IBsonSerializer bsonSerializer)
         {
-            Serializers.Add(new Serializer(bsonSerializer));
+            Serializers.Add(bsonSerializer);
         }
 
         public void AddBsonClassMap(IBsonClassMapConfiguration bsonClassMapConfiguration)

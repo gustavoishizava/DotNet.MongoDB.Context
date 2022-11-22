@@ -2,8 +2,6 @@ using System.Reflection;
 using DotNet.MongoDB.Context.Configuration;
 using DotNet.MongoDB.Context.Context.ChangeTracking;
 using DotNet.MongoDB.Context.Context.Interfaces;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace DotNet.MongoDB.Context.Context
@@ -23,9 +21,6 @@ namespace DotNet.MongoDB.Context.Context
 
             _options = options;
 
-            ApplyConventions(options.ConventionPack);
-            ApplySerializer(options.Serializers);
-
             Client = mongoClient;
             Database = mongoDatabase;
 
@@ -33,24 +28,6 @@ namespace DotNet.MongoDB.Context.Context
             ChangeTracker = new();
 
             RegisterCollections();
-        }
-
-        private void ApplyConventions(ConventionPack conventionPack)
-        {
-            ConventionRegistry.Register("Conventions", conventionPack, _ => true);
-        }
-
-        private void ApplySerializer(List<Serializer> serializers)
-        {
-            serializers.ForEach(x =>
-            {
-                if (x.Registered)
-                    return;
-
-                var type = x.BsonSerializer.GetType().BaseType.GenericTypeArguments[0];
-                BsonSerializer.RegisterSerializer(type, x.BsonSerializer);
-                x.Register();
-            });
         }
 
         private List<PropertyInfo> GetCollectionProperties()

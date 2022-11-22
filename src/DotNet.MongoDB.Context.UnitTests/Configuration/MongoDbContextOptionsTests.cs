@@ -93,7 +93,7 @@ namespace DotNet.MongoDB.Context.UnitTests.Configuration
 
             // Assert
             Assert.Single(options.Serializers);
-            Assert.Equal(bsonSerializer, options.Serializers.First().BsonSerializer);
+            Assert.Equal(bsonSerializer, options.Serializers.First());
         }
 
         [Fact]
