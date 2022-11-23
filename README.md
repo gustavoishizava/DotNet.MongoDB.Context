@@ -24,6 +24,30 @@ PM> Install-Package Ishizava.MongoDB.Context
     }
 ```
 
+## Create mapping
+```csharp
+    public class CustomerMap : BsonClassMapConfiguration
+    {
+        public CustomerMap() : base("customers")
+        {
+        }
+
+        public override BsonClassMap GetConfiguration()
+        {
+            var map = new BsonClassMap<Customer>();
+
+            map.MapIdField(x => x.Id);
+
+            map.MapProperty(x => x.Name)
+                .SetElementName("full_name");
+
+            map.MapProperty(x => x.CreatedAt)
+                .SetElementName("created_at");
+
+            return map;
+        }
+    }
+```
 
 ## Creating an DbContext
 
@@ -35,20 +59,6 @@ PM> Install-Package Ishizava.MongoDB.Context
         }
 
         public DbSet<Customer> Customers { get; set; }
-
-        protected override void OnModelConfiguring(ModelBuilder modelBuilder)
-        {
-            modelBuilder.AddModelMap<Customer>("customers", map =>
-            {
-                map.MapIdField(x => x.Id);
-
-                map.MapProperty(x => x.Name)
-                    .SetElementName("full_name");
-
-                map.MapProperty(x => x.CreatedAt)
-                    .SetElementName("created_at");
-            });
-        }
     }
 ```
 
@@ -59,6 +69,11 @@ PM> Install-Package Ishizava.MongoDB.Context
 services.AddMongoDbContext<MyDbContext>(options =>
 {
     options.ConfigureConnection("your_connection_string", "your_database");
+
+    options.AddSerializer(new GuidSerializer(BsonType.String));
+    options.AddSerializer(new DecimalSerializer(BsonType.Decimal128));
+
+    options.AddBsonClassMap(new CustomerMap());
 });
 ```
 
