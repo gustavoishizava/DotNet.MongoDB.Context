@@ -6,13 +6,15 @@ namespace DotNet.MongoDB.Context.Configuration
 {
     public class MongoDbContextOptions
     {
-        public readonly List<IBsonSerializer> Serializers;
-        public readonly List<IBsonClassMapConfiguration> BsonClassMapConfigurations;
+        private readonly List<IBsonSerializer> _serializers;
+        private readonly List<IBsonClassMapConfiguration> _bsonClassMapConfigurations;
         internal readonly ConventionPack ConventionPack;
         public string ConnectionString { get; private set; }
         public string DatabaseName { get; private set; }
 
         public IReadOnlyList<IConvention> Conventions => ConventionPack.Conventions.ToList().AsReadOnly();
+        public IReadOnlyCollection<IBsonSerializer> Serializers => _serializers.AsReadOnly();
+        public IReadOnlyCollection<IBsonClassMapConfiguration> BsonClassMapConfigurations => _bsonClassMapConfigurations.AsReadOnly();
 
         public MongoDbContextOptions(string connectionString, string databaseName) : this()
         {
@@ -22,8 +24,8 @@ namespace DotNet.MongoDB.Context.Configuration
         internal MongoDbContextOptions()
         {
             ConventionPack = new();
-            Serializers = new();
-            BsonClassMapConfigurations = new();
+            _serializers = new();
+            _bsonClassMapConfigurations = new();
         }
 
         public void ConfigureConnection(string connectionString, string databaseName)
@@ -55,12 +57,12 @@ namespace DotNet.MongoDB.Context.Configuration
 
         public void AddSerializer(IBsonSerializer bsonSerializer)
         {
-            Serializers.Add(bsonSerializer);
+            _serializers.Add(bsonSerializer);
         }
 
         public void AddBsonClassMap(IBsonClassMapConfiguration bsonClassMapConfiguration)
         {
-            BsonClassMapConfigurations.Add(bsonClassMapConfiguration);
+            _bsonClassMapConfigurations.Add(bsonClassMapConfiguration);
         }
     }
 }

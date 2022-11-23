@@ -18,7 +18,7 @@ namespace DotNet.MongoDB.Context.Mapping
 
         protected BsonClassMapConfiguration() { }
 
-        private bool MapExists(Type type) => BsonClassMap.IsClassMapRegistered(type);
+        private static bool MapExists(Type type) => BsonClassMap.IsClassMapRegistered(type);
 
         public void Apply()
         {

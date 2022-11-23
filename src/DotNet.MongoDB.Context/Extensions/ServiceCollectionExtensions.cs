@@ -30,7 +30,7 @@ namespace DotNet.MongoDB.Context.Extensions
         }
 
         private static void ApplyBsonMaps(MongoDbContextOptions options)
-            => options.BsonClassMapConfigurations.ForEach(x => x.Apply());
+            => options.BsonClassMapConfigurations.ToList().ForEach(x => x.Apply());
 
         private static void ApplySerializers(MongoDbContextOptions options)
         {
